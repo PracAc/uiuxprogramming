@@ -11,27 +11,73 @@
         주요 사용자: 생각이 많아 정리가 안되는 사람
         목적: 메모를 작성하고 정리를 통해 생각정리를 도와준다.
         핵심 행동: 메모 기록하고 각 메모당 순위 및 중요도를 정한다.
-        정보 순서: 소개 → 주요 기능 → 이용 방법 -> 메모 리스트 → 메모 작성 -> 메모 정리  -->
+        정보 순서: 소개 → 주요 기능 → 이용 방법 -> 메모 작성 -->
 
   <header>
     <h1>생각정리 서비스</h1>
     <p>생각정리를 위한 메모 작성, 정리를 도와줍니다.</p>
+
+    <nav araia-label="주요 메뉴">
+      <a href="#about">서비스 소개</a>
+      <a href="#features">메모 기능</a>
+      <a href="#steps">이용 방법</a>
+      <a href="#writing">메모 작성</a>
+    </nav>
   </header>
 
   <main>
-    <section id="about"></section>
-    <section id="features"></section>
-    <section id="steps"></section>
-    <section id="subscribe"></section>
-    <section id="list"></section>
+    <section id="about">
+      <h2>서비스 소개</h2>
+      <h3>생각을 메모하는 효과적인 서비스</h3>
+      
+      <img src="assets/images/service.png" alt="서비스 이미지">
+      
+      <p>MindStore는 생각을 메모하고 정리하는 데 도움을 주는 서비스입니다.</p>
+      <p>주요 기능으로는 메모 작성, 정리, 순위 및 중요도 설정이 있습니다.</p>
+    </section>
+
+    <section id="features">
+      <h2>메모 기능</h2>
+      <ul>
+        <li>
+          <h3>메모 작성</h3>
+          <p>새로운 생각이나 정보를 메모로 남길 수 있습니다.</p>
+        </li>
+        <li>
+          <h3>메모 정리</h3>
+          <p>작성한 메모를 정리하고 분류할 수 있습니다.</p>
+        </li>
+        <li>
+          <h3>메모 순위 및 중요도 설정</h3>
+          <p>각 메모에 대해 순위와 중요도를 설정하여 우선순위를 관리할 수 있습니다.</p>
+        </li>
+      </ul>
+    </section>
+
+    <section id="steps">
+      <h2>이용 방법</h2>
+      <ol>
+        <li>서비스에 가입합니다.</li>
+        <li>메모를 작성합니다.</li>
+        <li>작성한 메모를 정리하고 분류합니다.</li>
+        <li>각 메모에 대해 순위와 중요도를 설정합니다.</li>
+      </ol>
+    </section>
+
+    <section id="writing">
+      <h2>메모 작성</h2>
+      <form>
+        <label for="memo">메모 작성:</label><br>
+        <textarea id="memo" name="memo" rows="4" cols="50"></textarea><br>
+        <button type="submit">메모 저장</button>
+      </form>
+    </section>
   </main>
 
-  <h2>서비스 소개</h2>
-  <h3>생각을 메모하는 효과적인 서비스</h3>
-  
   <footer>
-    <small>ⓒ 2026 생각정리 서비스</small>
+    <small>&copy; 2026 MindStore. All rights reserved.</small>
   </footer>
+
 </body>
 
 </html>
