@@ -4,6 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <title>MindStore</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -21,7 +25,7 @@
       <a href="#about">서비스 소개</a>
       <a href="#features">메모 기능</a>
       <a href="#steps">이용 방법</a>
-      <a href="#writing">메모 작성</a>
+      <a href="#writing">서비스 신청</a>
     </nav>
   </header>
 
@@ -38,16 +42,16 @@
 
     <section id="features">
       <h2>메모 기능</h2>
-      <ul>
-        <li>
+      <ul class="feature-list">
+        <li class="feature-card">
           <h3>메모 작성</h3>
           <p>새로운 생각이나 정보를 메모로 남길 수 있습니다.</p>
         </li>
-        <li>
+        <li class="feature-card">
           <h3>메모 정리</h3>
           <p>작성한 메모를 정리하고 분류할 수 있습니다.</p>
         </li>
-        <li>
+        <li class="feature-card">
           <h3>메모 순위 및 중요도 설정</h3>
           <p>각 메모에 대해 순위와 중요도를 설정하여 우선순위를 관리할 수 있습니다.</p>
         </li>
@@ -64,12 +68,12 @@
       </ol>
     </section>
 
-    <section id="writing">
-      <h2>메모 작성</h2>
+    <section id="writing" class="memo-writing">
+      <h2>서비스 신청</h2>
       <form>
-        <label for="memo">메모 작성:</label><br>
-        <textarea id="memo" name="memo" rows="4" cols="50"></textarea><br>
-        <button type="submit">메모 저장</button>
+        <label for="email">이메일:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        <button type="submit">서비스 신청</button>
       </form>
     </section>
   </main>
