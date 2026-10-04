@@ -10,6 +10,9 @@ body {
 header,
 main,
 footer {
+  /* 반응형 처리 */
+  width: 100%;
+
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 16px;
@@ -34,7 +37,9 @@ section{
 }
 
 nav{
+  /* 반응형 처리 */
   display: flex;
+
   gap: 24px;
   margin-top: 24px;
 }
@@ -74,13 +79,30 @@ p{
   list-style-type:none;
   padding-left: 0;
   margin: 0;
-  display: flex;
+
+  /* flex사용 */
+  /* display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
+   */
+
+  /* display grid 사용 */
+  display: grid;
+
+  /* 들어갈 수 있는 만큼 열을 만들고, 카드너비는 최소 260px부터 남은 공간만큼 사용 */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+
   gap: 24px;
 }
 
 .feature-card {
-  flex: 1;
+  /* flex사용시 */
+  /* 늘어나기 1, 줄어들기 1, 기본너비 260px */
+  /* flex: 1 1 260px; */
+
+  /* grid 사용시 */
+  min-width: 0;
+
   padding: 20px 24px;
   margin-bottom: 0px;
   border: 1px solid #dededa;
@@ -142,4 +164,68 @@ input:focus{
 
 button:active {
   transform: translateY(1px);
+}
+
+/* 가로폭 768px 이하 */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+
+  header{
+    padding-top: 32px;
+    padding-bottom: 24px;
+  }
+
+  section{
+    margin-top: 40px;
+  }
+
+  h1 {
+    font-size: 36px;
+  }
+
+  h2 {
+    font-size: 28px;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  nav a{
+    /* 링크주변 클릭할수 있는 여백설정 */
+    padding: 8px 0;
+  }
+
+  .feature-list {
+    /* flex 사용시 */
+    /* flex-direction: column; */
+
+    /* grid 사용시 */
+    grid-template-columns: 1fr;
+  }
+
+  .feature-card {
+    /* flex사용시 세로배치에서 260px를 카드 높이로 사용안함 */
+    /* flex: 1 1 auto; */
+
+    flex: none;
+    width: 100%;
+  }
+
+  form{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  input, button{
+    width: 100%;
+  }
+
+  button{
+    min-height: 48px;
+  }
 }
