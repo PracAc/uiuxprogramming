@@ -71,17 +71,24 @@
 
     <section id="writing" class="memo-writing">
       <h2>서비스 신청</h2>
-      <form>
+      <form id="subscribeForm">
         <label for="email">이메일:</label><br>
         <input type="email" id="email" name="email" required><br>
-        <button type="submit">서비스 신청</button>
+        <button id="subscribeButton" type="submit">서비스 신청</button>
       </form>
+
+      <p id="subscribeMessage" aria-live="polite">
+        이메일을 입력한뒤 신청해주세요
+      </p>
+
     </section>
   </main>
 
   <footer>
     <small>&copy; 2026 MindStore. All rights reserved.</small>
   </footer>
+
+  <script src="script.js"></script>
 
 </body>
 
