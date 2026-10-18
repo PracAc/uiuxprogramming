@@ -22,7 +22,7 @@
     <h1>생각정리 서비스</h1>
     <p>생각정리를 위한 메모 작성, 정리를 도와줍니다.</p>
 
-    <nav araia-label="주요 메뉴">
+    <nav aria-label="주요 메뉴">
       <a href="#about">서비스 소개</a>
       <a href="#features">메모 기능</a>
       <a href="#steps">이용 방법</a>
@@ -43,20 +43,65 @@
 
     <section id="features">
       <h2>메모 기능</h2>
-      <ul class="feature-list">
-        <li class="feature-card">
-          <h3>메모 작성</h3>
-          <p>새로운 생각이나 정보를 메모로 남길 수 있습니다.</p>
-        </li>
-        <li class="feature-card">
-          <h3>메모 정리</h3>
-          <p>작성한 메모를 정리하고 분류할 수 있습니다.</p>
-        </li>
-        <li class="feature-card">
-          <h3>메모 순위 및 중요도 설정</h3>
-          <p>각 메모에 대해 순위와 중요도를 설정하여 우선순위를 관리할 수 있습니다.</p>
-        </li>
-      </ul>
+      <div class="tabs" role="tablist" aria-label="기능 선택">
+        <button id="tab-write"
+                class="tab is-active"
+                type="button"
+                role="tab" 
+                aria-selected="true" 
+                aria-controls="feature-write"
+                data-target="feature-write">
+                메모 작성
+        </button>
+        
+        <button id="tab-organize"
+                class="tab"
+                type="button"
+                role="tab" 
+                aria-selected="false" 
+                aria-controls="feature-organize"
+                data-target="feature-organize">
+                메모 정리
+        </button>
+        
+        <button id="tab-priority"
+                class="tab"
+                type="button"
+                role="tab" 
+                aria-selected="false" 
+                aria-controls="feature-priority"
+                data-target="feature-priority">
+                메모 순위 및 중요도 설정
+        </button>
+      </div>
+
+      
+      <div  id="feature-write"
+            class="panel is-active" 
+            role="tabpanel" 
+            aria-labelledby="tab-write">
+        <h3>메모 작성</h3>
+        <p>새로운 생각이나 정보를 메모로 남길 수 있습니다.</p>
+      </div>
+
+      <div  id="feature-organize"
+            class="panel" 
+            role="tabpanel" 
+            aria-labelledby="tab-organize"
+            hidden>
+        <h3>메모 정리</h3>
+        <p>작성한 메모를 카테고리별로 정리하고 분류할 수 있습니다.</p>
+      </div>
+
+      <div  id="feature-priority"
+            class="panel" 
+            role="tabpanel" 
+            aria-labelledby="tab-priority"
+            hidden>
+        <h3>메모 순위 및 중요도 설정</h3>
+        <p>각 메모에 대해 순위와 중요도를 설정하여 우선순위를 관리할 수 있습니다.</p>
+      </div>
+      
     </section>
 
     <section id="steps">
@@ -67,6 +112,36 @@
         <li>작성한 메모를 정리하고 분류합니다.</li>
         <li>각 메모에 대해 순위와 중요도를 설정합니다.</li>
       </ol>
+    </section>
+
+    <section id="event-practice">
+      <h2>서비스 준비 설정</h2>
+      
+      <div class="event-grid">
+        <article class="event-card">
+          <h3>화면 테마</h3>
+          <button id="themeButton" type="button">다크 테마로 바꾸기</button>
+        </article>
+
+        <article class="event-card">
+          <h3>이용자 정보</h3>
+          <label for="nickName">이용자 이름</label>
+          <input type="text" id="nickName" maxlength="10">
+          <p id="nickNameCount" aria-live="polite">0 / 10</p>
+        </article>
+
+        <article class="event-card">
+          <h3>녹음 활용 동의</h3>
+          <label class="agree-row">
+            <input type="checkbox" id="agreeCheck">
+            서비스 이용을 위한 녹음 활용에 동의합니다.
+          </label>
+
+          <p id="agreeMessage" aria-live="polite">동의 후 서비스를 이용할 수 있습니다.</p>
+
+          <button id="startServiceButton" type="button" disabled>서비스 이용</button>
+        </article>
+      </div>
     </section>
 
     <section id="writing" class="memo-writing">
