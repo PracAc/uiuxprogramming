@@ -163,7 +163,7 @@ function revokeRecordingAgreement(){
   agreeCheck.checked = false;
   memoFlow.hidden = true;
   handleAgreeChange();
-  agreeCheck.focus;
+  agreeCheck.focus();
 }
 
 startServiceButton.addEventListener("click", ()=>{
@@ -172,7 +172,7 @@ startServiceButton.addEventListener("click", ()=>{
 });
 
 recordingClose.addEventListener("click", () => {
-  recordingClose.closest();
+  recordingDialog.close();
   revokeRecordingAgreement();
 })
 
