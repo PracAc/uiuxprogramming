@@ -76,8 +76,10 @@ function handleAgreeChange() {
 
   if (agreed) {
     agreeMessage.classList.add("is-ready");
+    startServiceButton.classList.remove("disabled");
   } else {
     agreeMessage.classList.remove("is-ready");
+    startServiceButton.classList.add("disabled");
   }
 }
 
@@ -117,4 +119,132 @@ function handleTabClick(event) {
 
 tabs.forEach(function(tab) {
   tab.addEventListener("click", handleTabClick);
+});
+
+const memoFlow = document.querySelector("#memo-flow");
+const flowSteps = memoFlow.querySelectorAll(".step");
+const progressItems = memoFlow.querySelectorAll(".progress_item");
+const titleInput = document.querySelector("#memo-title");
+const titleError = document.querySelector("#title-error");
+const titleNext = document.querySelector("#title-next");
+const memoRange = document.querySelector("#memo-range");
+const memoValue = document.querySelector("#memo-range-output");
+const memoPrioritySetting = document.querySelector("#memo-priority-setting");
+const memoPriority = document.querySelector("#memo-priority");
+const optionPrev = document.querySelector("#option-prev");
+const optionNext = document.querySelector("#option-next");
+const summaryPrev = document.querySelector("#summary-prev");
+const finishButton = document.querySelector("#finish-button");
+const restartButton = document.querySelector("#restart-button");
+const summaryTitle = document.querySelector("#summary-title");
+const summaryRange = document.querySelector("#summary-range");
+const summaryPrivacy = document.querySelector("#summary-privacy");
+const durationValues = ["5","10","15"];
+
+const formData = {
+  title : "",
+  duration : "5",
+  priority : false,
+  priorityValue : "medium"
+}
+
+function showStep(index){
+  flowSteps.forEach((step, i) => { step.hidden = i !== index; });
+  progressItems.forEach((item, i) => { 
+    item.classList.toggle("is-active", i === index)
+  });
+}
+
+const recordingDialog = document.querySelector("#recording-dialog");
+const recordingClose = document.querySelector("#recording-close");
+const recordingConfirm = document.querySelector("#recording-confirm");
+
+function revokeRecordingAgreement(){
+  agreeCheck.checked = false;
+  memoFlow.hidden = true;
+  handleAgreeChange();
+  agreeCheck.focus;
+}
+
+startServiceButton.addEventListener("click", ()=>{
+  if(!agreeCheck.checked)return;
+  recordingDialog.showModal();
+});
+
+recordingClose.addEventListener("click", () => {
+  recordingClose.closest();
+  revokeRecordingAgreement();
+})
+
+recordingDialog.addEventListener("cancel", revokeRecordingAgreement);
+recordingConfirm.addEventListener("click", ()=>{
+  if(!agreeCheck.checked)return;
+  recordingDialog.close();
+  memoFlow.hidden = false;
+  showStep(0);
+  memoFlow.scrollIntoView({behavior : "smooth"});
+  titleInput.focus();
+});
+
+function validateTitle(){
+  const value = titleInput.value.trim();
+  if(!value){
+    titleError.textContent = "제목을 입력해주세요.";
+    titleError.classList.add("has-error");
+    titleInput.focus();
+    return false;
+  }
+  titleError.textContent = "";
+  titleError.classList.remove("has-error");
+  formData.title = value;
+  return true;
+};
+
+titleNext.addEventListener("click", () => {
+  if(!validateTitle()) return;
+  showStep(1);
+});
+
+memoRange.addEventListener("input", () => {
+  memoValue.value = durationValues[memoRange.value] + "일";
+});
+
+memoPrioritySetting.addEventListener("change", () => {
+  memoPriority.hidden = !memoPrioritySetting.checked;
+});
+
+optionPrev.addEventListener("click", () => {
+  showStep(0);
+});
+
+optionNext.addEventListener("click", () => {
+  formData.duration = durationValues[memoRange.value];
+  formData.priority = memoPrioritySetting.checked;
+  const priorityValue = document.querySelector('input[name="priority-value"]:checked');
+  formData.priorityValue = priorityValue.value;
+  summaryTitle.textContent = formData.title;
+  summaryRange.textContent = formData.duration + "일";
+  summaryPrivacy.textContent = formData.priority? "중요도 : " + formData.priorityValue : "중요도 설정 안 함";
+  showStep(2);
+});
+
+summaryPrev.addEventListener("click", ()=>{showStep(1);});
+finishButton.addEventListener("click", ()=>{showStep(3);});
+restartButton.addEventListener("click", ()=>{
+  formData.title = "";
+  formData.duration = "5";
+  formData.priority = false;
+  formData.priorityValue = "medium";
+  titleInput.value = "";
+  titleError.textContent = "";
+  titleError.classList.remove("has-error");
+  memoRange.value = "1";
+  memoValue.value = "5";
+  memoPrioritySetting.checked = false;
+  memoPriority.hidden = true;
+  document.querySelector('input[name="priority-value"][value="medium"]').checked = true;
+  summaryTitle.textContent = "";
+  summaryRange.textContent = "";
+  summaryPrivacy.textContent = "";
+  showStep(0);
 });

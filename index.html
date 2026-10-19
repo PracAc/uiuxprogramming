@@ -139,9 +139,75 @@
 
           <p id="agreeMessage" aria-live="polite">동의 후 서비스를 이용할 수 있습니다.</p>
 
-          <button id="startServiceButton" type="button" disabled>서비스 이용</button>
+          <button id="startServiceButton" class="disabled" type="button" disabled>서비스 이용</button>
         </article>
       </div>
+    </section>
+
+    <dialog id="recording-dialog" aria-labelledby="recording-title" aria-describedby="recording-description">
+      <h2 id="recording-title">녹음 활용 안내</h2>
+      <p id="recording-description">서비스 이용에 녹음 기능을 활용할 수 있습니다.</p>
+      <div class="dialog-actions">
+        <button id="recording-close" type="button">돌아가기</button>
+        <button id="recording-confirm" type="button">동의하기</button>
+      </div>
+    </dialog>
+
+    <section id="memo-flow" class="memo-flow" hidden>
+      <h2>메모 작성 설정</h2>
+      <p class="progress" aria-label="메모 작성 진행 단계">
+        <span class="progress_item">1. 정보</span>
+        <span class="progress_item">2. 조건</span>
+        <span class="progress_item">3. 확인</span>
+      </p>
+
+      <section class="step" data-step="1" hidden>
+        <h3>메모 정보를 입력해주세요.</h3>
+        <label for="memo-title">메모 제목:</label><br>
+        <input id="memo-title" type="text" placeholder="예: OOO회의록" aria-describedby="title-error">
+        <p id="title-error" class="error-message" aria-live="polite"></p>
+        <button id="title-next" type="button">조건 선택하기</button>
+      </section>
+
+      <section class="step" data-step="2" hidden>
+        <h3>메모 조건을 선택해주세요.</h3>
+        <label for="memo-range">메모 기한</label><br>
+        <input id="memo-range" type="range" min="0" max="2" value="1">
+        <output id="memo-range-output" for="memo-range">10일</output>
+        <label><input type="checkbox" id="memo-priority-setting">메모 중요도설정</label>
+
+        <fieldset id="memo-priority" hidden>
+          <legend>메모 중요도</legend>
+          <label><input type="radio" name="priority-value" value="low"> 낮음</label>
+          <label><input type="radio" name="priority-value" value="medium" checked> 보통</label>
+          <label><input type="radio" name="priority-value" value="high"> 높음</label>
+        </fieldset>
+
+        <div class="step-actions">
+          <button id="option-prev" type="button">이전</button>
+          <button id="option-next" type="button">메모 확인하기</button>
+        </div>
+      </section>
+
+      <section class="step" data-step="3" hidden>
+        <h3>메모 작성 확인</h3>
+        <div class="summary-list">
+          <div><span>메모 제목</span><strong id="summary-title"></strong></div>
+          <div><span>메모 기한</span><strong id="summary-range"></strong></div>
+          <div><span>메모 중요도</span><strong id="summary-privacy"></strong></div>
+        </div>
+        <div class="step-actions">
+          <button id="summary-prev" type="button">수정하기</button>
+          <button id="finish-button" type="button">작성 완료하기</button>
+        </div>
+      </section>
+
+      <section class="step" data-step="4" hidden>
+        <h3>메모 작성이 완료되었습니다.</h3>
+        <p>작성한 내용을 확인했습니다. 필요하면 다시 작성할 수 있습니다. </p>
+        <button id="restart-button" type="button">다시 설정하기</button>
+      </section>
+      
     </section>
 
     <section id="writing" class="memo-writing">
