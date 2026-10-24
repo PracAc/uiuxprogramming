@@ -229,7 +229,10 @@ optionNext.addEventListener("click", () => {
 });
 
 summaryPrev.addEventListener("click", ()=>{showStep(1);});
-finishButton.addEventListener("click", ()=>{showStep(3);});
+finishButton.addEventListener("click", ()=>{
+  showStep(3);
+  addMemo();
+});
 restartButton.addEventListener("click", ()=>{
   formData.title = "";
   formData.duration = "5";
@@ -248,3 +251,250 @@ restartButton.addEventListener("click", ()=>{
   summaryPrivacy.textContent = "";
   showStep(0);
 });
+
+
+
+const memoList = document.querySelector("#memo-list");
+const memoCount = document.querySelector("#memo-count");
+const memoEmpty = document.querySelector("#memo-empty");
+const memoMessage = document.querySelector("#memo-message");
+const memoThemeButton = document.querySelector("#memo-theme-button");
+
+const memoEditDialog = document.querySelector("#memo-edit-dialog");
+const memoEditForm = document.querySelector("#memo-edit-form");
+const editMemoTitle = document.querySelector("#edit-memo-title");
+const editMemoDuration = document.querySelector("#edit-memo-duration");
+const editMemoPriority = document.querySelector("#edit-memo-priority");
+const editMemoError = document.querySelector("#edit-memo-error");
+const memoEditCancel = document.querySelector("#memo-edit-cancel");
+
+const MEMO_STORAGE_KEY = "mindstore-memos";
+
+let memoData = [];
+try {
+  const savedMemos = JSON.parse(
+    localStorage.getItem(MEMO_STORAGE_KEY) || "[]"
+  );
+  memoData = Array.isArray(savedMemos) ? savedMemos : [];
+} catch (error) {
+  memoData = [];
+}
+
+let editingMemoId = null;
+
+function getPriorityText(memo) {
+  if (!memo.priority) return "설정 안 함";
+
+  const priorityNames = {
+    low: "낮음",
+    medium: "보통",
+    high: "높음"
+  };
+
+  return priorityNames[memo.priorityValue] || "보통";
+}
+
+function saveMemos() {
+  try {
+    localStorage.setItem(
+      MEMO_STORAGE_KEY,
+      JSON.stringify(memoData)
+    );
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function showMemoMessage(message) {
+  memoMessage.textContent = message;
+}
+
+function addMemo() {
+  const newMemo = {
+    id: crypto.randomUUID(),
+    title: formData.title,
+    duration: formData.duration,
+    priority: formData.priority,
+    priorityValue: formData.priorityValue
+  };
+
+  memoData.push(newMemo);
+
+  const saved = saveMemos();
+  renderMemoList();
+
+  showMemoMessage(
+    saved
+      ? "새로운 메모가 목록에 추가되었습니다."
+      : "메모가 추가되었지만 브라우저에 저장하지 못했습니다."
+  );
+}
+
+function renderMemoList() {
+  memoList.replaceChildren();
+
+  memoCount.textContent = `전체 ${memoData.length}개`;
+  memoEmpty.hidden = memoData.length > 0;
+
+  if (memoData.length === 0) return;
+
+  const header = document.createElement("div");
+  header.className = "memo-table-header";
+
+  ["메모 제목", "기한", "중요도", "관리"].forEach((text) => {
+    const column = document.createElement("span");
+    column.textContent = text;
+    header.appendChild(column);
+  });
+
+  memoList.appendChild(header);
+
+  memoData.forEach((memo) => {
+    const row = document.createElement("div");
+    row.className = "memo-card";
+
+    const title = document.createElement("div");
+    title.className = "memo-title";
+    title.textContent = memo.title;
+
+    const duration = document.createElement("div");
+    duration.className = "memo-duration";
+    duration.textContent = `${memo.duration}일`;
+
+    const priority = document.createElement("div");
+    priority.className = "memo-priority";
+    priority.textContent = getPriorityText(memo);
+
+    const actions = document.createElement("div");
+    actions.className = "memo-actions";
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "수정";
+    editButton.dataset.action = "edit";
+    editButton.dataset.id = memo.id;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "삭제";
+    deleteButton.className = "delete-button";
+    deleteButton.dataset.action = "delete";
+    deleteButton.dataset.id = memo.id;
+
+    actions.append(editButton, deleteButton);
+    row.append(title, duration, priority, actions);
+    memoList.appendChild(row);
+  });
+}
+
+function openMemoEdit(id) {
+  const memo = memoData.find((item) => item.id === id);
+  if (!memo) return;
+
+  editingMemoId = id;
+
+  editMemoTitle.value = memo.title;
+  editMemoDuration.value = memo.duration;
+  editMemoPriority.value = memo.priority
+    ? memo.priorityValue
+    : "none";
+
+  editMemoError.textContent = "";
+  memoEditDialog.showModal();
+}
+
+memoEditForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const newTitle = editMemoTitle.value.trim();
+
+  if (newTitle === "") {
+    editMemoError.textContent =
+      "메모 제목을 입력한 후 저장해주세요.";
+    editMemoTitle.focus();
+    return;
+  }
+
+  const memo = memoData.find(
+    (item) => item.id === editingMemoId
+  );
+
+  if (!memo) {
+    editMemoError.textContent =
+      "수정할 메모를 찾을 수 없습니다.";
+    return;
+  }
+
+  memo.title = newTitle;
+  memo.duration = editMemoDuration.value;
+  memo.priority = editMemoPriority.value !== "none";
+  memo.priorityValue = memo.priority
+    ? editMemoPriority.value
+    : "medium";
+
+  const saved = saveMemos();
+
+  renderMemoList();
+  memoEditDialog.close();
+  editingMemoId = null;
+
+  showMemoMessage(
+    saved
+      ? "메모가 수정되었습니다."
+      : "메모가 수정되었지만 브라우저에 저장하지 못했습니다."
+  );
+});
+
+memoEditCancel.addEventListener("click", () => {
+  memoEditDialog.close();
+  editingMemoId = null;
+  showMemoMessage("메모 수정을 취소했습니다.");
+});
+
+memoEditDialog.addEventListener("close", () => {
+  editingMemoId = null;
+});
+
+function deleteMemo(id) {
+  const memo = memoData.find((item) => item.id === id);
+  if (!memo) return;
+
+  const confirmed = confirm(
+    `"${memo.title}" 메모를 삭제하시겠습니까?`
+  );
+
+  if (!confirmed) {
+    showMemoMessage("메모 삭제를 취소했습니다.");
+    return;
+  }
+
+  memoData = memoData.filter((item) => item.id !== id);
+
+  const saved = saveMemos();
+  renderMemoList();
+
+  showMemoMessage(
+    saved
+      ? "메모가 삭제되었습니다."
+      : "메모가 목록에서 삭제되었지만 브라우저에 저장하지 못했습니다."
+  );
+}
+
+memoList.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-action]");
+
+  if (!button) return;
+
+  const id = button.dataset.id;
+  const action = button.dataset.action;
+
+  if (action === "edit") {
+    openMemoEdit(id);
+  } else if (action === "delete") {
+    deleteMemo(id);
+  }
+});
+
+renderMemoList();
+updateMemoThemeButton();

@@ -210,6 +210,68 @@
       
     </section>
 
+    <section id="memo-list-section" class="memo-list-section">
+      <div class="memo-list-header">
+        <div>
+          <h2>내 메모 목록</h2>
+          <p>작성한 메모를 확인하고 수정하거나 삭제할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <p id="memo-count">전체 0개</p>
+
+      <p id="memo-message" role="status" aria-live="polite"></p>
+
+      <div id="memo-list">
+        <!-- JavaScript에서 메모 카드 생성 -->
+      </div>
+
+      <p id="memo-empty">
+        작성된 메모가 없습니다. 메모를 작성해주세요.
+      </p>
+    </section>
+
+    <!-- 메모 수정 화면 -->
+    <dialog id="memo-edit-dialog" aria-labelledby="memo-edit-heading">
+      <h3 id="memo-edit-heading">메모 수정</h3>
+
+      <form id="memo-edit-form" novalidate>
+        <label for="edit-memo-title">메모 제목</label>
+        <input
+          id="edit-memo-title"
+          type="text"
+          maxlength="100"
+          required
+        >
+
+        <label for="edit-memo-duration">메모 기한</label>
+        <select id="edit-memo-duration">
+          <option value="5">5일</option>
+          <option value="10">10일</option>
+          <option value="15">15일</option>
+        </select>
+
+        <label for="edit-memo-priority">메모 중요도</label>
+        <select id="edit-memo-priority">
+          <option value="none">설정 안 함</option>
+          <option value="low">낮음</option>
+          <option value="medium">보통</option>
+          <option value="high">높음</option>
+        </select>
+
+        <p id="edit-memo-error" class="error-message"
+          aria-live="polite"></p>
+
+        <div class="memo-actions">
+          <button id="memo-edit-cancel" type="button">
+            취소
+          </button>
+          <button type="submit">수정 저장</button>
+        </div>
+      </form>
+    </dialog>
+
+
     <section id="writing" class="memo-writing">
       <h2>서비스 신청</h2>
       <form id="subscribeForm">

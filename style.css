@@ -351,6 +351,177 @@ body.dark .memo-flow{
   border-color: #2d2e38;
 }
 
+.memo-list-section {
+  padding: 24px;
+  border: 1px solid #dededa;
+  border-radius: 12px;
+  background-color: #fff;
+}
+
+.memo-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.memo-list-header h2 {
+  margin-bottom: 8px;
+}
+
+#memo-count {
+  font-weight: 700;
+}
+
+#memo-message {
+  color: #315c41;
+  font-weight: 700;
+}
+
+#memo-message:empty {
+  display: none;
+}
+
+#memo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.memo-table-header,
+.memo-card {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) 1fr 1fr 150px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.memo-table-header {
+  font-weight: 700;
+  background: #eeeef4;
+  border-radius: 8px;
+}
+
+.memo-card {
+  border: 1px solid #dededa;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.memo-title {
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.memo-duration,
+.memo-priority {
+  font-size: 14px;
+}
+
+.memo-actions {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+}
+
+.memo-actions button {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.delete-button {
+  background-color: #bd454f;
+}
+
+.delete-button:hover {
+  background-color: #9e303a;
+}
+
+#memo-empty {
+  padding: 24px;
+  text-align: center;
+  border: 1px dashed #b8b8c5;
+  border-radius: 10px;
+}
+
+#memo-edit-dialog {
+  width: min(480px, calc(100% - 32px));
+  max-width: 100%;
+  padding: 24px;
+  border: 1px solid #dededa;
+  border-radius: 12px;
+  color: #292a31;
+  background-color: #fff;
+}
+
+#memo-edit-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+#memo-edit-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+#memo-edit-form label {
+  font-weight: 700;
+}
+
+#memo-edit-form input,
+#memo-edit-form select {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dededa;
+  border-radius: 10px;
+  font: inherit;
+}
+
+#edit-memo-error {
+  color: #bd303e;
+  font-weight: 700;
+}
+
+body.dark .memo-list-section,
+body.dark .memo-card,
+body.dark #memo-edit-dialog {
+  color: #f4f4f8;
+  background-color: #50515f;
+  border-color: #6d6e7c;
+}
+
+body.dark .memo-table-header {
+  color: #f4f4f8;
+  background-color: #3b3c49;
+}
+
+body.dark #memo-empty {
+  border-color: #88899a;
+}
+
+body.dark #memo-message {
+  color: #b5f2c6;
+}
+
+body.dark #edit-memo-error {
+  color: #ffb6c0;
+}
+
+body.dark #memo-edit-dialog input,
+body.dark #memo-edit-dialog select {
+  color: #f4f4f8;
+  background-color: #343540;
+  border-color: #88899a;
+}
+
 /* 가로폭 768px 이하 */
 @media (max-width: 768px) {
   body {
@@ -450,4 +621,39 @@ body.dark .memo-flow{
   .memo-flow .step-actions button{width: 100%;}
   .memo-flow input[type="checkbox"],
   .memo-flow input[type="radio"]{width: auto;}
+
+  .memo-list-section {padding: 16px;}
+  #memo-list {grid-template-columns: 1fr;}
+
+  .memo-list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #memo-edit-dialog {padding: 16px;}
+  .memo-table-header {display: none;}
+
+  .memo-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .memo-duration::before {
+    content: "기한: ";
+    font-weight: 700;
+  }
+
+  .memo-priority::before {
+    content: "중요도: ";
+    font-weight: 700;
+  }
+
+  .memo-actions {
+    margin-top: 4px;
+  }
+
+  .memo-actions button {
+    width: 100%;
+  }
 }
