@@ -1,298 +1,216 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MindStore</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="생각을 기록하고 기한과 중요도를 정해 관리하는 MindStore 수업용 프로토타입">
+  <title>MindStore | 생각정리 서비스</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
-
 <body>
-  <!--  서비스 이름: MindStore
-        주요 사용자: 생각이 많아 정리가 안되는 사람
-        목적: 메모를 작성하고 정리를 통해 생각정리를 도와준다.
-        핵심 행동: 메모 기록하고 각 메모당 순위 및 중요도를 정한다.
-        정보 순서: 소개 → 주요 기능 → 이용 방법 -> 메모 작성 -->
-
-  <header>
-    <h1>생각정리 서비스</h1>
-    <p>생각정리를 위한 메모 작성, 정리를 도와줍니다.</p>
-
-    <nav aria-label="주요 메뉴">
-      <a href="#about">서비스 소개</a>
-      <a href="#features">메모 기능</a>
-      <a href="#steps">이용 방법</a>
-      <a href="#writing">서비스 신청</a>
-    </nav>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="MindStore 맨 위로">MindStore</a>
+      <nav aria-label="주요 메뉴">
+        <a href="#about">서비스 소개</a>
+        <a href="#steps">이용 방법</a>
+        <a href="#features">메모 기능</a>
+        <a href="#archive">내 메모</a>
+        <a href="#writing">서비스 신청</a>
+      </nav>
+      <button id="themeButton" class="theme-button" type="button" aria-pressed="false">다크 모드</button>
+    </div>
   </header>
 
-  <main>
-    <section id="about">
-      <h2>서비스 소개</h2>
-      <h3>생각을 메모하는 효과적인 서비스</h3>
-      
-      <img src="assets/images/service.png" alt="서비스 이미지">
-      
-      <p>MindStore는 생각을 메모하고 정리하는 데 도움을 주는 서비스입니다.</p>
-      <p>주요 기능으로는 메모 작성, 정리, 순위 및 중요도 설정이 있습니다.</p>
+  <main id="top">
+    <section id="about" class="hero container" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">WRITE. ORGANIZE. PRIORITIZE.</p>
+        <h1 id="hero-title">복잡한 생각을<br><em>간편하게 정리하세요.</em></h1>
+        <p class="hero-description">MindStore는 생각을 기록하고, 메모의 기한과 중요도를 설정해 체계적으로 관리하도록 돕는 서비스입니다.</p>
+        <a class="button button-primary" href="#event-practice">메모 작성 시작하기 <span aria-hidden="true">↗</span></a>
+        <p class="hero-note">수업용 프로토타입입니다. 녹음이나 외부 서비스 전송은 진행되지 않습니다.</p>
+      </div>
+      <figure class="hero-image">
+        <img src="assets/images/service.png" alt="MindStore 서비스 소개 이미지" width="1920" height="1080">
+        <figcaption>MindStore 서비스 콘셉트</figcaption>
+      </figure>
     </section>
 
-    <section id="features">
-      <h2>메모 기능</h2>
-      <div class="tabs" role="tablist" aria-label="기능 선택">
-        <button id="tab-write"
-                class="tab is-active"
-                type="button"
-                role="tab" 
-                aria-selected="true" 
-                aria-controls="feature-write"
-                data-target="feature-write">
-                메모 작성
-        </button>
-        
-        <button id="tab-organize"
-                class="tab"
-                type="button"
-                role="tab" 
-                aria-selected="false" 
-                aria-controls="feature-organize"
-                data-target="feature-organize">
-                메모 정리
-        </button>
-        
-        <button id="tab-priority"
-                class="tab"
-                type="button"
-                role="tab" 
-                aria-selected="false" 
-                aria-controls="feature-priority"
-                data-target="feature-priority">
-                메모 순위 및 중요도 설정
-        </button>
+    <section id="steps" class="section container" aria-labelledby="steps-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">HOW IT WORKS</p><h2 id="steps-title">간단한 세 단계로 시작해요.</h2></div>
+        <p>메모 정보를 입력하고 조건을 고른 뒤 저장합니다.</p>
       </div>
-
-      
-      <div  id="feature-write"
-            class="panel is-active" 
-            role="tabpanel" 
-            aria-labelledby="tab-write">
-        <h3>메모 작성</h3>
-        <p>새로운 생각이나 정보를 메모로 남길 수 있습니다.</p>
-      </div>
-
-      <div  id="feature-organize"
-            class="panel" 
-            role="tabpanel" 
-            aria-labelledby="tab-organize"
-            hidden>
-        <h3>메모 정리</h3>
-        <p>작성한 메모를 카테고리별로 정리하고 분류할 수 있습니다.</p>
-      </div>
-
-      <div  id="feature-priority"
-            class="panel" 
-            role="tabpanel" 
-            aria-labelledby="tab-priority"
-            hidden>
-        <h3>메모 순위 및 중요도 설정</h3>
-        <p>각 메모에 대해 순위와 중요도를 설정하여 우선순위를 관리할 수 있습니다.</p>
-      </div>
-      
-    </section>
-
-    <section id="steps">
-      <h2>이용 방법</h2>
-      <ol>
-        <li>서비스에 가입합니다.</li>
-        <li>메모를 작성합니다.</li>
-        <li>작성한 메모를 정리하고 분류합니다.</li>
-        <li>각 메모에 대해 순위와 중요도를 설정합니다.</li>
+      <ol class="how-list">
+        <li><span class="how-number">01</span><h3>메모 정보</h3><p>메모 제목을 입력합니다.</p></li>
+        <li><span class="how-number">02</span><h3>메모 조건</h3><p>기한과 중요도를 설정합니다.</p></li>
+        <li><span class="how-number">03</span><h3>저장과 관리</h3><p>내용을 확인하고 저장·수정·삭제합니다.</p></li>
       </ol>
     </section>
 
-    <section id="event-practice">
-      <h2>서비스 준비 설정</h2>
-      
+    <section id="features" class="section container" aria-labelledby="features-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">FEATURES</p><h2 id="features-title">메모 기능</h2></div>
+        <p>기능 탭을 선택하면 설명을 확인할 수 있습니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="tabs" role="tablist" aria-label="기능 선택">
+          <button id="tab-write" class="tab is-active" type="button" role="tab" aria-selected="true" aria-controls="feature-write" data-target="feature-write">메모 작성</button>
+          <button id="tab-organize" class="tab" type="button" role="tab" aria-selected="false" aria-controls="feature-organize" data-target="feature-organize" tabindex="-1">메모 정리</button>
+          <button id="tab-priority" class="tab" type="button" role="tab" aria-selected="false" aria-controls="feature-priority" data-target="feature-priority" tabindex="-1">순위 및 중요도</button>
+        </div>
+        <div id="feature-write" class="panel is-active" role="tabpanel" aria-labelledby="tab-write" tabindex="0">
+          <h3>메모 작성</h3><p>새로운 생각이나 정보를 메모로 남길 수 있습니다.</p>
+        </div>
+        <div id="feature-organize" class="panel" role="tabpanel" aria-labelledby="tab-organize" tabindex="0" hidden>
+          <h3>메모 정리</h3><p>작성한 메모를 한 목록에 모아 확인하고 관리할 수 있습니다.</p>
+        </div>
+        <div id="feature-priority" class="panel" role="tabpanel" aria-labelledby="tab-priority" tabindex="0" hidden>
+          <h3>메모 중요도 설정</h3><p>각 메모에 낮음·보통·높음 중 하나의 중요도를 설정할 수 있습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="event-practice" class="section container" aria-labelledby="practice-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">GET READY</p><h2 id="practice-title">서비스 준비 설정</h2></div>
+        <p>이름을 입력하고 안내에 동의하면 메모 작성 화면이 열립니다.</p>
+      </div>
       <div class="event-grid">
         <article class="event-card">
-          <h3>화면 테마</h3>
-          <button id="themeButton" type="button">다크 테마로 바꾸기</button>
+          <h3>화면 테마</h3><p>상단의 다크 모드 버튼으로 화면 색상을 바꿀 수 있습니다.</p>
         </article>
-
         <article class="event-card">
           <h3>이용자 정보</h3>
-          <label for="nickName">이용자 이름</label>
-          <input type="text" id="nickName" maxlength="10">
-          <p id="nickNameCount" aria-live="polite">0 / 10</p>
+          <label for="nickName">이용자 이름 <span class="optional">선택</span></label>
+          <input type="text" id="nickName" maxlength="10" placeholder="예: 민지" aria-describedby="nickNameCount">
+          <p id="nickNameCount" class="field-help" aria-live="polite">0 / 10</p>
         </article>
-
         <article class="event-card">
-          <h3>녹음 활용 동의</h3>
-          <label class="agree-row">
-            <input type="checkbox" id="agreeCheck">
-            서비스 이용을 위한 녹음 활용에 동의합니다.
-          </label>
-
-          <p id="agreeMessage" aria-live="polite">동의 후 서비스를 이용할 수 있습니다.</p>
-
-          <button id="startServiceButton" class="disabled" type="button" disabled>서비스 이용</button>
+          <h3>서비스 이용 안내</h3>
+          <label class="agree-row" for="agreeCheck"><input type="checkbox" id="agreeCheck"><span>프로토타입 이용 안내를 확인했습니다.</span></label>
+          <p id="agreeMessage" class="agree-message" aria-live="polite">안내 확인 후 서비스를 이용할 수 있습니다.</p>
+          <button id="startServiceButton" class="button button-primary disabled" type="button" disabled>메모 작성 시작</button>
         </article>
       </div>
     </section>
 
-    <dialog id="recording-dialog" aria-labelledby="recording-title" aria-describedby="recording-description">
-      <h2 id="recording-title">녹음 활용 안내</h2>
-      <p id="recording-description">서비스 이용에 녹음 기능을 활용할 수 있습니다.</p>
-      <div class="dialog-actions">
-        <button id="recording-close" type="button">돌아가기</button>
-        <button id="recording-confirm" type="button">동의하기</button>
+    <section id="planner" class="section container" aria-labelledby="planner-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">NEW MEMO</p><h2 id="planner-title">메모 작성 계획 만들기</h2></div>
+        <p>이전 단계로 돌아가도 입력한 내용이 유지됩니다.</p>
       </div>
-    </dialog>
+      <div class="planner-card">
+        <ol class="progress" aria-label="메모 작성 진행 단계">
+          <li class="progress-item is-current" aria-current="step"><span>1</span> 메모 정보</li>
+          <li class="progress-item"><span>2</span> 메모 조건</li>
+          <li class="progress-item"><span>3</span> 내용 확인</li>
+        </ol>
+        <form id="plan-form" novalidate>
+          <div class="flow-step" data-step="1">
+            <p class="step-kicker">STEP 01 / 메모 정보</p>
+            <h3>어떤 생각을 기록할까요?</h3>
+            <p class="step-description">나중에 쉽게 찾을 수 있도록 메모 제목을 적어 주세요.</p>
+            <div class="field">
+              <label for="presentation-title">메모 제목 <span class="required">필수</span></label>
+              <input id="presentation-title" name="title" type="text" maxlength="60" placeholder="예: 프로젝트 회의록" aria-describedby="title-help title-error">
+              <p id="title-help" class="field-help">2자 이상 60자까지 입력할 수 있습니다. <span id="title-count">0 / 60자</span></p>
+              <p id="title-error" class="field-error error-message" role="alert"></p>
+            </div>
+            <div class="step-actions step-actions-end"><button id="info-next" class="button button-primary" type="button">조건 선택하기 <span aria-hidden="true">→</span></button></div>
+          </div>
 
-    <section id="memo-flow" class="memo-flow" hidden>
-      <h2>메모 작성 설정</h2>
-      <p class="progress" aria-label="메모 작성 진행 단계">
-        <span class="progress_item">1. 정보</span>
-        <span class="progress_item">2. 조건</span>
-        <span class="progress_item">3. 확인</span>
-      </p>
+          <div class="flow-step" data-step="2" hidden>
+            <p class="step-kicker">STEP 02 / 메모 조건</p>
+            <h3>메모 조건을 선택해 주세요.</h3>
+            <p class="step-description">메모를 관리할 기한과 중요도를 선택합니다.</p>
+            <div class="field">
+              <label for="duration-range">메모 기한</label>
+              <input id="duration-range" type="range" min="0" max="2" step="1" value="1" aria-describedby="duration-output">
+              <output id="duration-output" for="duration-range">10일</output>
+              <p class="field-help">5일 / 10일 / 15일 중 선택할 수 있습니다.</p>
+            </div>
+            <div class="field priority-field">
+              <label class="check-row" for="priority-option"><input type="checkbox" id="priority-option"><span><strong>메모 중요도 설정</strong><small>필요한 메모에만 중요도를 지정합니다.</small></span></label>
+              <fieldset id="priority-options" class="qna-options" hidden>
+                <legend>메모 중요도</legend>
+                <div class="inline-options">
+                  <label><input type="radio" name="priority-value" value="low"> 낮음</label>
+                  <label><input type="radio" name="priority-value" value="medium" checked> 보통</label>
+                  <label><input type="radio" name="priority-value" value="high"> 높음</label>
+                </div>
+              </fieldset>
+            </div>
+            <div class="step-actions"><button id="option-prev" class="button button-secondary" type="button">이전 단계</button><button id="option-next" class="button button-primary" type="button">내용 확인하기 <span aria-hidden="true">→</span></button></div>
+          </div>
 
-      <section class="step" data-step="1" hidden>
-        <h3>메모 정보를 입력해주세요.</h3>
-        <label for="memo-title">메모 제목:</label><br>
-        <input id="memo-title" type="text" placeholder="예: OOO회의록" aria-describedby="title-error">
-        <p id="title-error" class="error-message" aria-live="polite"></p>
-        <button id="title-next" type="button">조건 선택하기</button>
-      </section>
+          <div class="flow-step" data-step="3" hidden>
+            <p class="step-kicker">STEP 03 / 내용 확인</p>
+            <h3>이 메모를 저장할까요?</h3>
+            <p class="step-description">내용을 확인한 뒤 저장하세요. 수정 버튼으로 돌아갈 수 있습니다.</p>
+            <dl class="summary-list">
+              <div><dt>메모 제목</dt><dd id="summary-title"></dd></div>
+              <div><dt>메모 기한</dt><dd id="summary-duration"></dd></div>
+              <div><dt>메모 중요도</dt><dd id="summary-priority"></dd></div>
+            </dl>
+            <div class="step-actions"><div class="edit-actions"><button id="edit-info" class="button button-text" type="button">제목 수정</button><button id="edit-options" class="button button-text" type="button">조건 수정</button></div><button id="save-plan" class="button button-primary" type="button">메모 저장하기 <span aria-hidden="true">→</span></button></div>
+          </div>
 
-      <section class="step" data-step="2" hidden>
-        <h3>메모 조건을 선택해주세요.</h3>
-        <label for="memo-range">메모 기한</label><br>
-        <input id="memo-range" type="range" min="0" max="2" value="1">
-        <output id="memo-range-output" for="memo-range">10일</output>
-        <label><input type="checkbox" id="memo-priority-setting">메모 중요도설정</label>
-
-        <fieldset id="memo-priority" hidden>
-          <legend>메모 중요도</legend>
-          <label><input type="radio" name="priority-value" value="low"> 낮음</label>
-          <label><input type="radio" name="priority-value" value="medium" checked> 보통</label>
-          <label><input type="radio" name="priority-value" value="high"> 높음</label>
-        </fieldset>
-
-        <div class="step-actions">
-          <button id="option-prev" type="button">이전</button>
-          <button id="option-next" type="button">메모 확인하기</button>
-        </div>
-      </section>
-
-      <section class="step" data-step="3" hidden>
-        <h3>메모 작성 확인</h3>
-        <div class="summary-list">
-          <div><span>메모 제목</span><strong id="summary-title"></strong></div>
-          <div><span>메모 기한</span><strong id="summary-range"></strong></div>
-          <div><span>메모 중요도</span><strong id="summary-privacy"></strong></div>
-        </div>
-        <div class="step-actions">
-          <button id="summary-prev" type="button">수정하기</button>
-          <button id="finish-button" type="button">작성 완료하기</button>
-        </div>
-      </section>
-
-      <section class="step" data-step="4" hidden>
-        <h3>메모 작성이 완료되었습니다.</h3>
-        <p>작성한 내용을 확인했습니다. 필요하면 다시 작성할 수 있습니다. </p>
-        <button id="restart-button" type="button">다시 설정하기</button>
-      </section>
-      
+          <div class="flow-step complete-step" data-step="4" hidden>
+            <div class="complete-mark" aria-hidden="true">✓</div>
+            <p class="step-kicker">메모 저장 완료</p>
+            <h3>메모를 저장했습니다.</h3>
+            <p id="complete-message">내 메모 목록에서 확인하고 수정하거나 삭제할 수 있습니다.</p>
+            <div class="complete-actions"><a class="button button-primary" href="#archive">내 메모 보기 <span aria-hidden="true">↗</span></a><button id="restart-button" class="button button-secondary" type="button">새 메모 만들기</button></div>
+          </div>
+        </form>
+      </div>
     </section>
 
-    <section id="memo-list-section" class="memo-list-section">
-      <div class="memo-list-header">
-        <div>
-          <h2>내 메모 목록</h2>
-          <p>작성한 메모를 확인하고 수정하거나 삭제할 수 있습니다.</p>
-        </div>
+    <section id="archive" class="section container archive-section" aria-labelledby="memo-list-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">MY MEMOS</p><h2 id="memo-list-title">내 메모 목록 <span id="plan-count" class="count-badge">0</span></h2></div>
+        <p>저장된 메모를 수정하거나 삭제할 수 있습니다. 데이터는 이 브라우저에 저장됩니다.</p>
       </div>
-
-      <p id="memo-count">전체 0개</p>
-
-      <p id="memo-message" role="status" aria-live="polite"></p>
-
-      <div id="memo-list">
-        <!-- JavaScript에서 메모 카드 생성 -->
-      </div>
-
-      <p id="memo-empty">
-        작성된 메모가 없습니다. 메모를 작성해주세요.
-      </p>
+      <p id="archive-status" class="archive-status" role="status" aria-live="polite"></p>
+      <div id="empty-state" class="empty-state"><span class="empty-icon" aria-hidden="true">✎</span><h3>아직 작성한 메모가 없습니다.</h3><p>첫 번째 메모를 만들어 보세요.</p><a class="button button-secondary" href="#event-practice">메모 만들러 가기</a></div>
+      <div id="plan-list" class="memo-list" aria-label="저장한 메모 목록" hidden></div>
     </section>
 
-    <!-- 메모 수정 화면 -->
-    <dialog id="memo-edit-dialog" aria-labelledby="memo-edit-heading">
-      <h3 id="memo-edit-heading">메모 수정</h3>
-
-      <form id="memo-edit-form" novalidate>
-        <label for="edit-memo-title">메모 제목</label>
-        <input
-          id="edit-memo-title"
-          type="text"
-          maxlength="100"
-          required
-        >
-
-        <label for="edit-memo-duration">메모 기한</label>
-        <select id="edit-memo-duration">
-          <option value="5">5일</option>
-          <option value="10">10일</option>
-          <option value="15">15일</option>
-        </select>
-
-        <label for="edit-memo-priority">메모 중요도</label>
-        <select id="edit-memo-priority">
-          <option value="none">설정 안 함</option>
-          <option value="low">낮음</option>
-          <option value="medium">보통</option>
-          <option value="high">높음</option>
-        </select>
-
-        <p id="edit-memo-error" class="error-message"
-          aria-live="polite"></p>
-
-        <div class="memo-actions">
-          <button id="memo-edit-cancel" type="button">
-            취소
-          </button>
-          <button type="submit">수정 저장</button>
-        </div>
-      </form>
-    </dialog>
-
-
-    <section id="writing" class="memo-writing">
-      <h2>서비스 신청</h2>
-      <form id="subscribeForm">
-        <label for="email">이메일:</label><br>
-        <input type="email" id="email" name="email" required><br>
-        <button id="subscribeButton" type="submit">서비스 신청</button>
-      </form>
-
-      <p id="subscribeMessage" aria-live="polite">
-        이메일을 입력한뒤 신청해주세요
-      </p>
-
+    <section id="writing" class="section container" aria-labelledby="writing-title">
+      <div class="section-heading"><div><p class="eyebrow">SUBSCRIBE</p><h2 id="writing-title">서비스 신청</h2></div><p>이메일을 입력하면 신청 완료 메시지를 표시하는 실습 기능입니다.</p></div>
+      <div class="memo-writing">
+        <form id="subscribeForm">
+          <label for="email">이메일 <span class="required">필수</span></label>
+          <div class="subscribe-row"><input type="email" id="email" name="email" placeholder="example@email.com" required><button id="subscribeButton" class="button button-primary" type="submit">서비스 신청</button></div>
+        </form>
+        <p id="subscribeMessage" class="field-help" role="status" aria-live="polite">이메일을 입력한 뒤 신청해 주세요.</p>
+      </div>
     </section>
   </main>
 
-  <footer>
-    <small>&copy; 2026 MindStore. All rights reserved.</small>
-  </footer>
+  <dialog id="recording-dialog" class="app-dialog" aria-labelledby="recording-title" aria-describedby="recording-description">
+    <h2 id="recording-title">프로토타입 이용 안내</h2>
+    <p id="recording-description">실제 녹음이나 서버 전송은 하지 않습니다. 메모 제목, 기한, 중요도는 이 브라우저에 저장됩니다.</p>
+    <div class="dialog-actions"><button id="recording-close" class="button button-secondary" type="button">돌아가기</button><button id="recording-confirm" class="button button-primary" type="button">확인하고 시작</button></div>
+  </dialog>
 
-  <script src="script.js"></script>
+  <dialog id="memo-edit-dialog" class="app-dialog" aria-labelledby="memo-edit-heading">
+    <h2 id="memo-edit-heading">메모 수정</h2>
+    <form id="memo-edit-form" novalidate>
+      <div class="field"><label for="edit-memo-title">메모 제목</label><input id="edit-memo-title" type="text" maxlength="100" required></div>
+      <div class="field"><label for="edit-memo-duration">메모 기한</label><select id="edit-memo-duration"><option value="5">5일</option><option value="10">10일</option><option value="15">15일</option></select></div>
+      <div class="field"><label for="edit-memo-priority">메모 중요도</label><select id="edit-memo-priority"><option value="none">설정 안 함</option><option value="low">낮음</option><option value="medium">보통</option><option value="high">높음</option></select></div>
+      <p id="edit-memo-error" class="field-error" role="alert"></p>
+      <div class="dialog-actions"><button id="memo-edit-cancel" class="button button-secondary" type="button">취소</button><button class="button button-primary" type="submit">수정 저장</button></div>
+    </form>
+  </dialog>
 
+  <footer class="site-footer"><div class="container footer-inner"><strong>MindStore</strong><small>생각정리 서비스 · 수업용 프로토타입 · 2026</small></div></footer>
 </body>
-
 </html>

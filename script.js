@@ -1,500 +1,345 @@
-const serviceName = "MindStore";
-let isSubscribed = false;
-let submitConunt = 0;
+const storageKey = 'mindstore-memos';
+const form = document.querySelector('#plan-form');
+const steps = [...document.querySelectorAll('.flow-step')];
+const progressItems = [...document.querySelectorAll('.progress-item')];
+const titleInput = document.querySelector('#presentation-title');
+const titleError = document.querySelector('#title-error');
+const titleCount = document.querySelector('#title-count');
+const durationRange = document.querySelector('#duration-range');
+const durationOutput = document.querySelector('#duration-output');
+const priorityOption = document.querySelector('#priority-option');
+const priorityOptions = document.querySelector('#priority-options');
+const planList = document.querySelector('#plan-list');
+const emptyState = document.querySelector('#empty-state');
+const planCount = document.querySelector('#plan-count');
+const archiveStatus = document.querySelector('#archive-status');
+const durationValues = ['5', '10', '15'];
+const priorityNames = { low: '낮음', medium: '보통', high: '높음' };
 
-
-function makeSubscribeMessage(email, isSubscribed) {
-  if (isSubscribed) {
-    return `${email}로 신청이 완료되었습니다.`;
-  } 
-  
-  return `이메일을 입력한 뒤 신청해주세요.`;
-}
-
-const subscribeForm = document.getElementById("subscribeForm");
-const emailInput = document.getElementById("email");
-
-const subscribeButton = document.getElementById("subscribeButton");
-const subscribeMessage = document.getElementById("subscribeMessage");
-
-function handleSubscribe(event) {
-  event.preventDefault();
-
-  const subscribeEmail = emailInput.value.trim();
-
-  if (subscribeEmail === "") {
-    subscribeMessage.textContent = "이메일을 입력한 뒤 신청해주세요.";
-    emailInput.focus();
-    return;
-  }
-
-  isSubscribed = true;
-  submitConunt += 1;
-
-  subscribeMessage.textContent = makeSubscribeMessage(subscribeEmail, isSubscribed);
-
-  subscribeMessage.classList.add("is-success");
-
-  subscribeButton.textContent = "신청 완료";
-  subscribeButton.disabled = true;
-  subscribeButton.classList.add("disabled");
-}
-
-subscribeForm.addEventListener("submit", handleSubscribe);
-
-const themeButton = document.getElementById("themeButton");
-const nickNameInput = document.getElementById("nickName");
-const nickNameCount = document.getElementById("nickNameCount");
-const agreeCheck = document.getElementById("agreeCheck");
-const agreeMessage = document.getElementById("agreeMessage");
-const startServiceButton = document.getElementById("startServiceButton");
-
-function handleThemeChange() {
-  const isDark = document.body.classList.toggle("dark");
-
-  themeButton.textContent = isDark ? "라이트 모드" : "다크 모드";
-}
-
-themeButton.addEventListener("click", handleThemeChange);
-
-function handleNicknameInput() {
-  const maxLength = nickNameInput.maxLength;
-  const currentLength = Math.min(nickNameInput.value.length, maxLength);
-
-  nickNameCount.textContent = `${currentLength} / ${maxLength}`;
-}
-
-nickNameInput.addEventListener("input", handleNicknameInput);
-
-function handleAgreeChange() {
-  const agreed = agreeCheck.checked;
-
-  startServiceButton.disabled = !agreed;
-  agreeMessage.textContent = agreed 
-  ? "서비스를 이용할 수 있습니다."
-  : "서비스 동의 후 서비스 이용이 가능합니다.";
-
-  if (agreed) {
-    agreeMessage.classList.add("is-ready");
-    startServiceButton.classList.remove("disabled");
-  } else {
-    agreeMessage.classList.remove("is-ready");
-    startServiceButton.classList.add("disabled");
+function readPlans() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    if (!Array.isArray(stored)) return [];
+    return stored.filter(plan => plan && (typeof plan.id === 'string' || typeof plan.id === 'number') && typeof plan.title === 'string')
+      .map(plan => ({
+        id: String(plan.id),
+        title: plan.title.slice(0, 100),
+        duration: durationValues.includes(String(plan.duration)) ? String(plan.duration) : '10',
+        priority: plan.priority === true,
+        priorityValue: Object.prototype.hasOwnProperty.call(priorityNames, plan.priorityValue) ? plan.priorityValue : 'medium'
+      }));
+  } catch {
+    return [];
   }
 }
 
-agreeCheck.addEventListener("change", handleAgreeChange);
+let plans = readPlans();
+let currentStep = 1;
+let editingMemoId = null;
 
+function savePlans() {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(plans));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-const tabs = document.querySelectorAll(".tab");
-const panels = document.querySelectorAll(".panel");
-
-function resetTabsAndPanels() {
-  tabs.forEach(function(tab) {
-    tab.classList.remove("is-active");
-    tab.setAttribute("aria-selected", "false");
+function showStep(number) {
+  currentStep = number;
+  steps.forEach(step => { step.hidden = Number(step.dataset.step) !== number; });
+  progressItems.forEach((item, index) => {
+    const isCurrent = index === number - 1;
+    item.classList.toggle('is-current', isCurrent);
+    item.classList.toggle('is-done', index < number - 1);
+    if (isCurrent && number <= 3) item.setAttribute('aria-current', 'step');
+    else item.removeAttribute('aria-current');
   });
-
-  panels.forEach(function(panel) {
-    panel.classList.remove("is-active");
-    panel.hidden = true;
-  });
+  const heading = steps[number - 1].querySelector('h3');
+  heading.tabIndex = -1;
+  heading.focus({ preventScroll: true });
+  document.querySelector('#planner').scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
-function activateTab(clickedTab) {
-  const targetSelector = clickedTab.dataset.target;
-  const targetPanel = document.getElementById(targetSelector);
-
-  clickedTab.classList.add("is-active");
-  clickedTab.setAttribute("aria-selected", "true");
-
-  targetPanel.classList.add("is-active");
-  targetPanel.hidden = false;
-}
-
-function handleTabClick(event) {
-  resetTabsAndPanels();
-  activateTab(event.currentTarget);
-}
-
-tabs.forEach(function(tab) {
-  tab.addEventListener("click", handleTabClick);
-});
-
-const memoFlow = document.querySelector("#memo-flow");
-const flowSteps = memoFlow.querySelectorAll(".step");
-const progressItems = memoFlow.querySelectorAll(".progress_item");
-const titleInput = document.querySelector("#memo-title");
-const titleError = document.querySelector("#title-error");
-const titleNext = document.querySelector("#title-next");
-const memoRange = document.querySelector("#memo-range");
-const memoValue = document.querySelector("#memo-range-output");
-const memoPrioritySetting = document.querySelector("#memo-priority-setting");
-const memoPriority = document.querySelector("#memo-priority");
-const optionPrev = document.querySelector("#option-prev");
-const optionNext = document.querySelector("#option-next");
-const summaryPrev = document.querySelector("#summary-prev");
-const finishButton = document.querySelector("#finish-button");
-const restartButton = document.querySelector("#restart-button");
-const summaryTitle = document.querySelector("#summary-title");
-const summaryRange = document.querySelector("#summary-range");
-const summaryPrivacy = document.querySelector("#summary-privacy");
-const durationValues = ["5","10","15"];
-
-const formData = {
-  title : "",
-  duration : "5",
-  priority : false,
-  priorityValue : "medium"
-}
-
-function showStep(index){
-  flowSteps.forEach((step, i) => { step.hidden = i !== index; });
-  progressItems.forEach((item, i) => { 
-    item.classList.toggle("is-active", i === index)
-  });
-}
-
-const recordingDialog = document.querySelector("#recording-dialog");
-const recordingClose = document.querySelector("#recording-close");
-const recordingConfirm = document.querySelector("#recording-confirm");
-
-function revokeRecordingAgreement(){
-  agreeCheck.checked = false;
-  memoFlow.hidden = true;
-  handleAgreeChange();
-  agreeCheck.focus();
-}
-
-startServiceButton.addEventListener("click", ()=>{
-  if(!agreeCheck.checked)return;
-  recordingDialog.showModal();
-});
-
-recordingClose.addEventListener("click", () => {
-  recordingDialog.close();
-  revokeRecordingAgreement();
-})
-
-recordingDialog.addEventListener("cancel", revokeRecordingAgreement);
-recordingConfirm.addEventListener("click", ()=>{
-  if(!agreeCheck.checked)return;
-  recordingDialog.close();
-  memoFlow.hidden = false;
-  showStep(0);
-  memoFlow.scrollIntoView({behavior : "smooth"});
-  titleInput.focus();
-});
-
-function validateTitle(){
-  const value = titleInput.value.trim();
-  if(!value){
-    titleError.textContent = "제목을 입력해주세요.";
-    titleError.classList.add("has-error");
+function validateTitle() {
+  const title = titleInput.value.trim();
+  if (!title) {
+    titleError.textContent = '메모 제목을 입력해 주세요. 공백만으로는 저장할 수 없습니다.';
+    titleInput.setAttribute('aria-invalid', 'true');
     titleInput.focus();
     return false;
   }
-  titleError.textContent = "";
-  titleError.classList.remove("has-error");
-  formData.title = value;
-  return true;
-};
-
-titleNext.addEventListener("click", () => {
-  if(!validateTitle()) return;
-  showStep(1);
-});
-
-memoRange.addEventListener("input", () => {
-  memoValue.value = durationValues[memoRange.value] + "일";
-});
-
-memoPrioritySetting.addEventListener("change", () => {
-  memoPriority.hidden = !memoPrioritySetting.checked;
-});
-
-optionPrev.addEventListener("click", () => {
-  showStep(0);
-});
-
-optionNext.addEventListener("click", () => {
-  formData.duration = durationValues[memoRange.value];
-  formData.priority = memoPrioritySetting.checked;
-  const priorityValue = document.querySelector('input[name="priority-value"]:checked');
-  formData.priorityValue = priorityValue.value;
-  summaryTitle.textContent = formData.title;
-  summaryRange.textContent = formData.duration + "일";
-  summaryPrivacy.textContent = formData.priority? "중요도 : " + formData.priorityValue : "중요도 설정 안 함";
-  showStep(2);
-});
-
-summaryPrev.addEventListener("click", ()=>{showStep(1);});
-finishButton.addEventListener("click", ()=>{
-  showStep(3);
-  addMemo();
-});
-restartButton.addEventListener("click", ()=>{
-  formData.title = "";
-  formData.duration = "5";
-  formData.priority = false;
-  formData.priorityValue = "medium";
-  titleInput.value = "";
-  titleError.textContent = "";
-  titleError.classList.remove("has-error");
-  memoRange.value = "1";
-  memoValue.value = "5";
-  memoPrioritySetting.checked = false;
-  memoPriority.hidden = true;
-  document.querySelector('input[name="priority-value"][value="medium"]').checked = true;
-  summaryTitle.textContent = "";
-  summaryRange.textContent = "";
-  summaryPrivacy.textContent = "";
-  showStep(0);
-});
-
-
-
-const memoList = document.querySelector("#memo-list");
-const memoCount = document.querySelector("#memo-count");
-const memoEmpty = document.querySelector("#memo-empty");
-const memoMessage = document.querySelector("#memo-message");
-const memoThemeButton = document.querySelector("#memo-theme-button");
-
-const memoEditDialog = document.querySelector("#memo-edit-dialog");
-const memoEditForm = document.querySelector("#memo-edit-form");
-const editMemoTitle = document.querySelector("#edit-memo-title");
-const editMemoDuration = document.querySelector("#edit-memo-duration");
-const editMemoPriority = document.querySelector("#edit-memo-priority");
-const editMemoError = document.querySelector("#edit-memo-error");
-const memoEditCancel = document.querySelector("#memo-edit-cancel");
-
-const MEMO_STORAGE_KEY = "mindstore-memos";
-
-let memoData = [];
-try {
-  const savedMemos = JSON.parse(
-    localStorage.getItem(MEMO_STORAGE_KEY) || "[]"
-  );
-  memoData = Array.isArray(savedMemos) ? savedMemos : [];
-} catch (error) {
-  memoData = [];
-}
-
-let editingMemoId = null;
-
-function getPriorityText(memo) {
-  if (!memo.priority) return "설정 안 함";
-
-  const priorityNames = {
-    low: "낮음",
-    medium: "보통",
-    high: "높음"
-  };
-
-  return priorityNames[memo.priorityValue] || "보통";
-}
-
-function saveMemos() {
-  try {
-    localStorage.setItem(
-      MEMO_STORAGE_KEY,
-      JSON.stringify(memoData)
-    );
-    return true;
-  } catch (error) {
+  if (title.length < 2) {
+    titleError.textContent = '메모 제목은 2자 이상 입력해 주세요.';
+    titleInput.setAttribute('aria-invalid', 'true');
+    titleInput.focus();
     return false;
   }
+  titleError.textContent = '';
+  titleInput.removeAttribute('aria-invalid');
+  return true;
 }
 
-function showMemoMessage(message) {
-  memoMessage.textContent = message;
-}
-
-function addMemo() {
-  const newMemo = {
-    id: crypto.randomUUID(),
-    title: formData.title,
-    duration: formData.duration,
-    priority: formData.priority,
-    priorityValue: formData.priorityValue
+function getFormValues() {
+  return {
+    title: titleInput.value.trim(),
+    duration: durationValues[Number(durationRange.value)],
+    priority: priorityOption.checked,
+    priorityValue: form.querySelector('input[name="priority-value"]:checked').value
   };
-
-  memoData.push(newMemo);
-
-  const saved = saveMemos();
-  renderMemoList();
-
-  showMemoMessage(
-    saved
-      ? "새로운 메모가 목록에 추가되었습니다."
-      : "메모가 추가되었지만 브라우저에 저장하지 못했습니다."
-  );
 }
 
-function renderMemoList() {
-  memoList.replaceChildren();
-
-  memoCount.textContent = `전체 ${memoData.length}개`;
-  memoEmpty.hidden = memoData.length > 0;
-
-  if (memoData.length === 0) return;
-
-  const header = document.createElement("div");
-  header.className = "memo-table-header";
-
-  ["메모 제목", "기한", "중요도", "관리"].forEach((text) => {
-    const column = document.createElement("span");
-    column.textContent = text;
-    header.appendChild(column);
-  });
-
-  memoList.appendChild(header);
-
-  memoData.forEach((memo) => {
-    const row = document.createElement("div");
-    row.className = "memo-card";
-
-    const title = document.createElement("div");
-    title.className = "memo-title";
-    title.textContent = memo.title;
-
-    const duration = document.createElement("div");
-    duration.className = "memo-duration";
-    duration.textContent = `${memo.duration}일`;
-
-    const priority = document.createElement("div");
-    priority.className = "memo-priority";
-    priority.textContent = getPriorityText(memo);
-
-    const actions = document.createElement("div");
-    actions.className = "memo-actions";
-
-    const editButton = document.createElement("button");
-    editButton.type = "button";
-    editButton.textContent = "수정";
-    editButton.dataset.action = "edit";
-    editButton.dataset.id = memo.id;
-
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.textContent = "삭제";
-    deleteButton.className = "delete-button";
-    deleteButton.dataset.action = "delete";
-    deleteButton.dataset.id = memo.id;
-
-    actions.append(editButton, deleteButton);
-    row.append(title, duration, priority, actions);
-    memoList.appendChild(row);
-  });
+function priorityText(plan) {
+  return plan.priority ? (priorityNames[plan.priorityValue] || '보통') : '설정 안 함';
 }
 
-function openMemoEdit(id) {
-  const memo = memoData.find((item) => item.id === id);
-  if (!memo) return;
-
-  editingMemoId = id;
-
-  editMemoTitle.value = memo.title;
-  editMemoDuration.value = memo.duration;
-  editMemoPriority.value = memo.priority
-    ? memo.priorityValue
-    : "none";
-
-  editMemoError.textContent = "";
-  memoEditDialog.showModal();
+function updateSummary() {
+  const values = getFormValues();
+  document.querySelector('#summary-title').textContent = values.title;
+  document.querySelector('#summary-duration').textContent = `${values.duration}일`;
+  document.querySelector('#summary-priority').textContent = priorityText(values);
 }
 
-memoEditForm.addEventListener("submit", (event) => {
+titleInput.addEventListener('input', () => {
+  titleCount.textContent = `${titleInput.value.length} / 60자`;
+  if (titleInput.getAttribute('aria-invalid') === 'true') validateTitle();
+});
+
+durationRange.addEventListener('input', () => {
+  durationOutput.value = `${durationValues[Number(durationRange.value)]}일`;
+});
+
+priorityOption.addEventListener('change', () => {
+  priorityOptions.hidden = !priorityOption.checked;
+});
+
+form.addEventListener('submit', event => {
   event.preventDefault();
+  if (currentStep === 1) document.querySelector('#info-next').click();
+});
 
-  const newTitle = editMemoTitle.value.trim();
+document.querySelector('#info-next').addEventListener('click', () => {
+  if (validateTitle()) showStep(2);
+});
+document.querySelector('#option-prev').addEventListener('click', () => showStep(1));
+document.querySelector('#option-next').addEventListener('click', () => {
+  updateSummary();
+  showStep(3);
+});
+document.querySelector('#edit-info').addEventListener('click', () => showStep(1));
+document.querySelector('#edit-options').addEventListener('click', () => showStep(2));
 
-  if (newTitle === "") {
-    editMemoError.textContent =
-      "메모 제목을 입력한 후 저장해주세요.";
+document.querySelector('#save-plan').addEventListener('click', () => {
+  if (!validateTitle()) {
+    showStep(1);
+    titleInput.focus();
+    return;
+  }
+  const plan = {
+    id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+    ...getFormValues()
+  };
+  plans.unshift(plan);
+  const persisted = savePlans();
+  renderPlans();
+  archiveStatus.textContent = persisted
+    ? `‘${plan.title}’ 메모를 저장했습니다.`
+    : '메모가 현재 화면에만 저장되었습니다. 브라우저 저장 공간 오류로 새로고침하면 사라질 수 있습니다.';
+  document.querySelector('#complete-message').textContent = `‘${plan.title}’ 메모를 내 메모 목록에서 확인할 수 있습니다.`;
+  showStep(4);
+});
+
+document.querySelector('#restart-button').addEventListener('click', () => {
+  form.reset();
+  priorityOptions.hidden = true;
+  durationOutput.value = '10일';
+  titleError.textContent = '';
+  titleCount.textContent = '0 / 60자';
+  titleInput.removeAttribute('aria-invalid');
+  showStep(1);
+  titleInput.focus();
+});
+
+// 3. 수업의 createText / renderPlans 흐름 + MindStore 수정/삭제 기능
+function createText(tag, className, content) {
+  const element = document.createElement(tag);
+  element.className = className;
+  element.textContent = content;
+  return element;
+}
+
+function renderPlans() {
+  planList.replaceChildren();
+  emptyState.hidden = plans.length !== 0;
+  planList.hidden = plans.length === 0;
+  planCount.textContent = String(plans.length);
+  planCount.setAttribute('aria-label', `저장한 메모 ${plans.length}개`);
+  if (plans.length === 0) return;
+
+  const header = createText('div', 'memo-table-header', '');
+  ['메모 제목', '기한', '중요도', '관리'].forEach(label => {
+    header.append(createText('span', '', label));
+  });
+  planList.append(header);
+
+  plans.forEach(plan => {
+    const row = createText('div', 'memo-card', '');
+    row.append(createText('div', 'memo-title', plan.title));
+    row.append(createText('div', 'memo-duration', `${plan.duration}일`));
+    row.append(createText('div', 'memo-priority', priorityText(plan)));
+    const actions = createText('div', 'memo-actions', '');
+    const editButton = createText('button', 'button button-secondary', '수정');
+    editButton.type = 'button';
+    editButton.dataset.action = 'edit';
+    editButton.dataset.id = plan.id;
+    const deleteButton = createText('button', 'button delete-button', '삭제');
+    deleteButton.type = 'button';
+    deleteButton.dataset.action = 'delete';
+    deleteButton.dataset.id = plan.id;
+    actions.append(editButton, deleteButton);
+    row.append(actions);
+    planList.append(row);
+  });
+}
+
+const memoEditDialog = document.querySelector('#memo-edit-dialog');
+const memoEditForm = document.querySelector('#memo-edit-form');
+const editMemoTitle = document.querySelector('#edit-memo-title');
+const editMemoDuration = document.querySelector('#edit-memo-duration');
+const editMemoPriority = document.querySelector('#edit-memo-priority');
+const editMemoError = document.querySelector('#edit-memo-error');
+
+planList.addEventListener('click', event => {
+  const button = event.target.closest('button[data-action]');
+  if (!button || !planList.contains(button)) return;
+  const plan = plans.find(item => item.id === button.dataset.id);
+  if (!plan) return;
+
+  if (button.dataset.action === 'edit') {
+    editingMemoId = plan.id;
+    editMemoTitle.value = plan.title;
+    editMemoDuration.value = plan.duration;
+    editMemoPriority.value = plan.priority ? plan.priorityValue : 'none';
+    editMemoError.textContent = '';
+    memoEditDialog.showModal();
+    return;
+  }
+
+  if (button.dataset.action === 'delete') {
+    if (!window.confirm(`‘${plan.title}’ 메모를 삭제하시겠습니까?`)) return;
+    plans = plans.filter(item => item.id !== plan.id);
+    const persisted = savePlans();
+    renderPlans();
+    archiveStatus.textContent = persisted ? '메모가 삭제되었습니다.' : '화면에서 삭제했지만 저장 공간 오류로 새로고침하면 복구될 수 있습니다.';
+  }
+});
+
+memoEditForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const title = editMemoTitle.value.trim();
+  if (title.length < 2) {
+    editMemoError.textContent = '메모 제목은 2자 이상 입력해 주세요.';
     editMemoTitle.focus();
     return;
   }
-
-  const memo = memoData.find(
-    (item) => item.id === editingMemoId
-  );
-
-  if (!memo) {
-    editMemoError.textContent =
-      "수정할 메모를 찾을 수 없습니다.";
+  const plan = plans.find(item => item.id === editingMemoId);
+  if (!plan) {
+    editMemoError.textContent = '수정할 메모를 찾을 수 없습니다.';
     return;
   }
-
-  memo.title = newTitle;
-  memo.duration = editMemoDuration.value;
-  memo.priority = editMemoPriority.value !== "none";
-  memo.priorityValue = memo.priority
-    ? editMemoPriority.value
-    : "medium";
-
-  const saved = saveMemos();
-
-  renderMemoList();
+  plan.title = title;
+  plan.duration = editMemoDuration.value;
+  plan.priority = editMemoPriority.value !== 'none';
+  plan.priorityValue = plan.priority ? editMemoPriority.value : 'medium';
+  const persisted = savePlans();
+  renderPlans();
   memoEditDialog.close();
-  editingMemoId = null;
-
-  showMemoMessage(
-    saved
-      ? "메모가 수정되었습니다."
-      : "메모가 수정되었지만 브라우저에 저장하지 못했습니다."
-  );
+  archiveStatus.textContent = persisted ? '메모가 수정되었습니다.' : '화면에서 수정했지만 브라우저 저장 공간에 반영하지 못했습니다.';
 });
 
-memoEditCancel.addEventListener("click", () => {
-  memoEditDialog.close();
-  editingMemoId = null;
-  showMemoMessage("메모 수정을 취소했습니다.");
+document.querySelector('#memo-edit-cancel').addEventListener('click', () => memoEditDialog.close());
+memoEditDialog.addEventListener('close', () => { editingMemoId = null; });
+
+const tabs = [...document.querySelectorAll('.tab')];
+const panels = [...document.querySelectorAll('.panel')];
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(item => {
+      const active = item === tab;
+      item.classList.toggle('is-active', active);
+      item.setAttribute('aria-selected', String(active));
+      item.tabIndex = active ? 0 : -1;
+    });
+    panels.forEach(panel => {
+      const active = panel.id === tab.dataset.target;
+      panel.classList.toggle('is-active', active);
+      panel.hidden = !active;
+    });
+  });
 });
 
-memoEditDialog.addEventListener("close", () => {
-  editingMemoId = null;
+const themeButton = document.querySelector('#themeButton');
+themeButton.addEventListener('click', () => {
+  const dark = document.body.classList.toggle('dark');
+  themeButton.textContent = dark ? '라이트 모드' : '다크 모드';
+  themeButton.setAttribute('aria-pressed', String(dark));
 });
 
-function deleteMemo(id) {
-  const memo = memoData.find((item) => item.id === id);
-  if (!memo) return;
+const nickNameInput = document.querySelector('#nickName');
+const nickNameCount = document.querySelector('#nickNameCount');
+nickNameInput.addEventListener('input', () => {
+  nickNameCount.textContent = `${nickNameInput.value.length} / 10`;
+});
 
-  const confirmed = confirm(
-    `"${memo.title}" 메모를 삭제하시겠습니까?`
-  );
+const agreeCheck = document.querySelector('#agreeCheck');
+const agreeMessage = document.querySelector('#agreeMessage');
+const startServiceButton = document.querySelector('#startServiceButton');
+const recordingDialog = document.querySelector('#recording-dialog');
+const planner = document.querySelector('#planner');
 
-  if (!confirmed) {
-    showMemoMessage("메모 삭제를 취소했습니다.");
-    return;
-  }
-
-  memoData = memoData.filter((item) => item.id !== id);
-
-  const saved = saveMemos();
-  renderMemoList();
-
-  showMemoMessage(
-    saved
-      ? "메모가 삭제되었습니다."
-      : "메모가 목록에서 삭제되었지만 브라우저에 저장하지 못했습니다."
-  );
+function handleAgreeChange() {
+  const agreed = agreeCheck.checked;
+  startServiceButton.disabled = !agreed;
+  startServiceButton.classList.toggle('disabled', !agreed);
+  agreeMessage.classList.toggle('is-ready', agreed);
+  agreeMessage.textContent = agreed ? '메모 작성을 시작할 수 있습니다.' : '안내 확인 후 서비스를 이용할 수 있습니다.';
 }
 
-memoList.addEventListener("click", (event) => {
-  const button = event.target.closest("button[data-action]");
-
-  if (!button) return;
-
-  const id = button.dataset.id;
-  const action = button.dataset.action;
-
-  if (action === "edit") {
-    openMemoEdit(id);
-  } else if (action === "delete") {
-    deleteMemo(id);
-  }
+agreeCheck.addEventListener('change', handleAgreeChange);
+startServiceButton.addEventListener('click', () => {
+  if (agreeCheck.checked) recordingDialog.showModal();
+});
+document.querySelector('#recording-close').addEventListener('click', () => {
+  recordingDialog.close();
+  agreeCheck.checked = false;
+  handleAgreeChange();
+});
+document.querySelector('#recording-confirm').addEventListener('click', () => {
+  if (!agreeCheck.checked) return;
+  recordingDialog.close();
+  planner.hidden = false;
+  showStep(1);
 });
 
-renderMemoList();
-updateMemoThemeButton();
+const subscribeForm = document.querySelector('#subscribeForm');
+const emailInput = document.querySelector('#email');
+const subscribeButton = document.querySelector('#subscribeButton');
+const subscribeMessage = document.querySelector('#subscribeMessage');
+subscribeForm.addEventListener('submit', event => {
+  event.preventDefault();
+  if (!emailInput.checkValidity()) {
+    subscribeMessage.textContent = '올바른 이메일을 입력해 주세요.';
+    subscribeMessage.classList.remove('is-success');
+    emailInput.focus();
+    return;
+  }
+  subscribeMessage.textContent = `${emailInput.value.trim()}로 신청이 완료되었습니다. (화면 실습용)`;
+  subscribeMessage.classList.add('is-success');
+  subscribeButton.textContent = '신청 완료';
+  subscribeButton.disabled = true;
+});
+
+handleAgreeChange();
+renderPlans();
