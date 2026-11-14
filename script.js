@@ -15,6 +15,13 @@ const planCount = document.querySelector('#plan-count');
 const archiveStatus = document.querySelector('#archive-status');
 const durationValues = ['5', '10', '15'];
 const priorityNames = { low: '낮음', medium: '보통', high: '높음' };
+const navLinks = document.querySelectorAll('.main-nav a');
+const menuToggle = document.querySelector('#menu-toggle');
+const mainNav = document.querySelector('#main-nav');
+const filterButtons = document.querySelectorAll('.filter-button');
+let currentFilter = 'all';
+
+
 
 function readPlans() {
   try {
@@ -170,13 +177,78 @@ function createText(tag, className, content) {
   return element;
 }
 
+function updateCurrentNav () {
+  const currentHash = window.location.hash;
+
+  navLinks.forEach((link) => {
+    const current = currentHash
+    ? link.getAttribute('href') === currentHash
+    : link === navLinks[0];
+
+    link.classList.toggle('is-current', current);
+
+    if(current){
+      link.setAttribute('aria-current', 'page');
+    }else{
+      link.removeAttribute('aria-current');
+    }
+  });
+}
+
+window.addEventListener('hashchange', updateCurrentNav);
+updateCurrentNav();
+
+menuToggle.addEventListener('click',() => {
+  const isOpen = mainNav.classList.toggle('is-open');
+  menuToggle.textContent = isOpen ? "메뉴 닫기" : "메뉴 열기";
+  menuToggle.setAttribute('aria-expanded', String(isOpen));
+});
+
+navLinks.forEach((link) => {
+  link.addEventListener('click', () => {
+    mainNav.classList.remove('is-open');
+    menuToggle.textContent = "메뉴 열기";
+    menuToggle.setAttribute('aria-expanded', 'false');
+  });
+});
+
+function getVisiblePlans() {
+  return plans.filter((plan) => {
+    if(currentFilter === 'all') return true;
+    if(currentFilter === 'canceled') return plan.canceled;
+    return !plan.canceled;
+  });
+}
+
 function renderPlans() {
+  const visiblePlans = getVisiblePlans();
+
   planList.replaceChildren();
-  emptyState.hidden = plans.length !== 0;
-  planList.hidden = plans.length === 0;
-  planCount.textContent = String(plans.length);
-  planCount.setAttribute('aria-label', `저장한 메모 ${plans.length}개`);
-  if (plans.length === 0) return;
+  emptyState.hidden = visiblePlans.length !== 0;
+  planList.hidden = visiblePlans.length === 0;
+
+  const emptyTitle = emptyState.querySelector('h3');
+  const emptyDescription = emptyState.querySelector('p');
+  const emptyAction = emptyState.querySelector('a');
+
+  if(visiblePlans.length === 0){
+    const filtered = currentFilter !== 'all';
+    emptyTitle.textContent = filtered 
+    ? "선택한 상태에 메모가 없습니다." 
+    : "아직 저장한 메모가 없습니다.";
+
+    emptyDescription.textContent = filtered
+    ? "다른 상태를 선택해 주십시오."
+    : "첫 메모를 작성하면 이곳에서 볼 수 있습니다.";
+
+    emptyAction.hidden = filtered;
+  }
+
+  planCount.textContent = String(visiblePlans.length);
+  planCount.setAttribute(
+    'aria-label',
+    `저장한 메모 ${plans.length}개`
+  )
 
   const header = createText('div', 'memo-table-header', '');
   ['메모 제목', '기한', '중요도', '관리'].forEach(label => {
@@ -184,7 +256,7 @@ function renderPlans() {
   });
   planList.append(header);
 
-  plans.forEach(plan => {
+  visiblePlans.forEach(plan => {
     const row = createText('div', 'memo-card', '');
     row.append(createText('div', 'memo-title', plan.title));
     row.append(createText('div', 'memo-duration', `${plan.duration}일`));
@@ -203,6 +275,20 @@ function renderPlans() {
     planList.append(row);
   });
 }
+
+filterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    currentFilter = button.dataset.filter;
+
+    filterButtons.forEach((item) => {
+      const selected = item === button;
+      item.classList.toggle('is-active', selected);
+      item.setAttribute('aria-pressed', String(selected));
+    });
+
+    renderPlans();
+  });
+});
 
 const memoEditDialog = document.querySelector('#memo-edit-dialog');
 const memoEditForm = document.querySelector('#memo-edit-form');

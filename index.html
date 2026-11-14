@@ -15,12 +15,19 @@
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="#top" aria-label="MindStore 맨 위로">MindStore</a>
-      <nav aria-label="주요 메뉴">
-        <a href="#about">서비스 소개</a>
-        <a href="#steps">이용 방법</a>
-        <a href="#features">메모 기능</a>
-        <a href="#archive">내 메모</a>
-        <a href="#writing">서비스 신청</a>
+
+      <button id="menu-toggle" class="menu-toggle" type="button"
+      aria-controls="main-nav" aria-expanded="false">
+        메뉴열기
+      </button>
+
+      <nav id="main-nav" class="main-nav" aria-label="주요 메뉴">
+        <ul>
+          <li><a href="#about">서비스 소개</a></li>
+          <li><a href="#steps">이용 방법</a></li>
+          <li><a href="#archive">내 메모</a></li>
+          <li><a href="#writing">서비스 신청</a></li>
+        </ul>
       </nav>
       <button id="themeButton" class="theme-button" type="button" aria-pressed="false">다크 모드</button>
     </div>
@@ -177,6 +184,22 @@
         <div><p class="eyebrow">MY MEMOS</p><h2 id="memo-list-title">내 메모 목록 <span id="plan-count" class="count-badge">0</span></h2></div>
         <p>저장된 메모를 수정하거나 삭제할 수 있습니다. 데이터는 이 브라우저에 저장됩니다.</p>
       </div>
+
+      <div class="memo-filters" role="group" aria-label="메모 표시 범위">
+        <button class="filter-button is-active"
+        type="button" data-filter="all" aria-pressed="true">
+        전체
+        </button>
+        <button class="filter-button"
+        type="button" data-filter="active" aria-pressed="false">
+        저장됨
+        </button>
+        <button class="filter-button"
+        type="button" data-filter="canceled" aria-pressed="false">
+        취소됨
+        </button>
+      </div>
+
       <p id="archive-status" class="archive-status" role="status" aria-live="polite"></p>
       <div id="empty-state" class="empty-state"><span class="empty-icon" aria-hidden="true">✎</span><h3>아직 작성한 메모가 없습니다.</h3><p>첫 번째 메모를 만들어 보세요.</p><a class="button button-secondary" href="#event-practice">메모 만들러 가기</a></div>
       <div id="plan-list" class="memo-list" aria-label="저장한 메모 목록" hidden></div>
