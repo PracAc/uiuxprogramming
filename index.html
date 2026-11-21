@@ -12,6 +12,7 @@
   <script src="script.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#top">본문 바로가기</a>
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="#top" aria-label="MindStore 맨 위로">MindStore</a>
@@ -33,7 +34,7 @@
     </div>
   </header>
 
-  <main id="top">
+  <main id="top" tabindex="-1">
     <section id="about" class="hero container" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow">WRITE. ORGANIZE. PRIORITIZE.</p>
@@ -43,7 +44,7 @@
         <p class="hero-note">수업용 프로토타입입니다. 녹음이나 외부 서비스 전송은 진행되지 않습니다.</p>
       </div>
       <figure class="hero-image">
-        <img src="assets/images/service.png" alt="MindStore 서비스 소개 이미지" width="1920" height="1080">
+        <img src="assets/images/service.png" alt="생각을 기록하고 기한과 중요도를 설정해 정리하는 MindStore 서비스 소개 화면" width="1920" height="1080">
         <figcaption>MindStore 서비스 콘셉트</figcaption>
       </figure>
     </section>
@@ -125,8 +126,9 @@
             <p class="step-description">나중에 쉽게 찾을 수 있도록 메모 제목을 적어 주세요.</p>
             <div class="field">
               <label for="presentation-title">메모 제목 <span class="required">필수</span></label>
-              <input id="presentation-title" name="title" type="text" maxlength="60" placeholder="예: 프로젝트 회의록" aria-describedby="title-help title-error">
-              <p id="title-help" class="field-help">2자 이상 60자까지 입력할 수 있습니다. <span id="title-count">0 / 60자</span></p>
+              <input id="presentation-title" name="title" type="text" maxlength="60" placeholder="예: 프로젝트 회의록" aria-describedby="title-help title-count title-error">
+              <p id="title-help" class="field-help">2자 이상 60자까지 입력할 수 있습니다.</p>
+              <p id="title-count" class="field-count">0 / 60자</p>
               <p id="title-error" class="field-error error-message" role="alert"></p>
             </div>
             <div class="step-actions step-actions-end"><button id="info-next" class="button button-primary" type="button">조건 선택하기 <span aria-hidden="true">→</span></button></div>
@@ -143,8 +145,8 @@
               <p class="field-help">5일 / 10일 / 15일 중 선택할 수 있습니다.</p>
             </div>
             <div class="field priority-field">
-              <label class="check-row" for="priority-option"><input type="checkbox" id="priority-option"><span><strong>메모 중요도 설정</strong><small>필요한 메모에만 중요도를 지정합니다.</small></span></label>
-              <fieldset id="priority-options" class="qna-options" hidden>
+              <label class="check-row" for="priority-option"><input type="checkbox" id="priority-option" aria-controls="priority-options" aria-expanded="false"><span><strong>메모 중요도 설정</strong><small>필요한 메모에만 중요도를 지정합니다.</small></span></label>
+              <fieldset id="priority-options" class="qna-options" hidden disabled>
                 <legend>메모 중요도</legend>
                 <div class="inline-options">
                   <label><input type="radio" name="priority-value" value="low"> 낮음</label>
@@ -165,7 +167,8 @@
               <div><dt>메모 기한</dt><dd id="summary-duration"></dd></div>
               <div><dt>메모 중요도</dt><dd id="summary-priority"></dd></div>
             </dl>
-            <div class="step-actions"><div class="edit-actions"><button id="edit-info" class="button button-text" type="button">제목 수정</button><button id="edit-options" class="button button-text" type="button">조건 수정</button></div><button id="save-plan" class="button button-primary" type="button">메모 저장하기 <span aria-hidden="true">→</span></button></div>
+            <div class="step-actions"><div class="edit-actions"><button id="edit-info" class="button button-text" type="button">제목 수정</button><button id="edit-options" class="button button-text" type="button">조건 수정</button></div><button id="save-plan" class="button button-primary" type="button">메모 저장하기</button></div>
+            <p id="submit-status" class="submit-status" role="status" aria-live="polite"></p>
           </div>
 
           <div class="flow-step complete-step" data-step="4" hidden>
@@ -182,7 +185,7 @@
     <section id="archive" class="section container archive-section" aria-labelledby="memo-list-title">
       <div class="section-heading">
         <div><p class="eyebrow">MY MEMOS</p><h2 id="memo-list-title">내 메모 목록 <span id="plan-count" class="count-badge">0</span></h2></div>
-        <p>저장된 메모를 수정하거나 삭제할 수 있습니다. 데이터는 이 브라우저에 저장됩니다.</p>
+        <p>저장된 메모를 수정하거나 취소·복구·삭제할 수 있습니다. 데이터는 이 브라우저에 저장됩니다.</p>
       </div>
 
       <div class="memo-filters" role="group" aria-label="메모 표시 범위">
@@ -224,9 +227,9 @@
   </dialog>
 
   <dialog id="memo-edit-dialog" class="app-dialog" aria-labelledby="memo-edit-heading">
-    <h2 id="memo-edit-heading">메모 수정</h2>
+    <div class="dialog-heading"><h2 id="memo-edit-heading">메모 수정</h2><button id="memo-edit-close" class="icon-button" type="button" aria-label="메모 수정 창 닫기">×</button></div>
     <form id="memo-edit-form" novalidate>
-      <div class="field"><label for="edit-memo-title">메모 제목</label><input id="edit-memo-title" type="text" maxlength="100" required></div>
+      <div class="field"><label for="edit-memo-title">메모 제목</label><input id="edit-memo-title" type="text" maxlength="100" minlength="2" aria-describedby="edit-memo-error" required></div>
       <div class="field"><label for="edit-memo-duration">메모 기한</label><select id="edit-memo-duration"><option value="5">5일</option><option value="10">10일</option><option value="15">15일</option></select></div>
       <div class="field"><label for="edit-memo-priority">메모 중요도</label><select id="edit-memo-priority"><option value="none">설정 안 함</option><option value="low">낮음</option><option value="medium">보통</option><option value="high">높음</option></select></div>
       <p id="edit-memo-error" class="field-error" role="alert"></p>

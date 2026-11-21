@@ -33,7 +33,8 @@ function readPlans() {
         title: plan.title.slice(0, 100),
         duration: durationValues.includes(String(plan.duration)) ? String(plan.duration) : '10',
         priority: plan.priority === true,
-        priorityValue: Object.prototype.hasOwnProperty.call(priorityNames, plan.priorityValue) ? plan.priorityValue : 'medium'
+        priorityValue: Object.prototype.hasOwnProperty.call(priorityNames, plan.priorityValue) ? plan.priorityValue : 'medium',
+        canceled: plan.canceled === true || plan.cancelled === true
       }));
   } catch {
     return [];
@@ -43,6 +44,9 @@ function readPlans() {
 let plans = readPlans();
 let currentStep = 1;
 let editingMemoId = null;
+let isSubmitting = false;
+const saveButton = document.querySelector('#save-plan');
+const submitStatus = document.querySelector('#submit-status');
 
 function savePlans() {
   try {
@@ -117,9 +121,15 @@ durationRange.addEventListener('input', () => {
   durationOutput.value = `${durationValues[Number(durationRange.value)]}일`;
 });
 
-priorityOption.addEventListener('change', () => {
-  priorityOptions.hidden = !priorityOption.checked;
-});
+function syncPriorityOptions() {
+  const enabled = priorityOption.checked;
+  priorityOptions.hidden = !enabled;
+  priorityOptions.disabled = !enabled;
+  priorityOption.setAttribute('aria-expanded', String(enabled));
+}
+
+priorityOption.addEventListener('change', syncPriorityOptions);
+syncPriorityOptions();
 
 form.addEventListener('submit', event => {
   event.preventDefault();
@@ -137,39 +147,57 @@ document.querySelector('#option-next').addEventListener('click', () => {
 document.querySelector('#edit-info').addEventListener('click', () => showStep(1));
 document.querySelector('#edit-options').addEventListener('click', () => showStep(2));
 
-document.querySelector('#save-plan').addEventListener('click', () => {
+function setSubmitState(state, message) {
+  isSubmitting = state === 'loading';
+  form.setAttribute('aria-busy', String(isSubmitting));
+  saveButton.disabled = isSubmitting;
+  saveButton.textContent = isSubmitting ? '저장하는 중…' : '메모 저장하기';
+  submitStatus.textContent = message;
+  submitStatus.classList.toggle('is-success', state === 'success');
+  submitStatus.classList.toggle('has-error', state === 'error');
+}
+
+saveButton.addEventListener('click', () => {
+  if (isSubmitting) return;
   if (!validateTitle()) {
     showStep(1);
     titleInput.focus();
     return;
   }
-  const plan = {
-    id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-    ...getFormValues()
-  };
-  plans.unshift(plan);
-  const persisted = savePlans();
-  renderPlans();
-  archiveStatus.textContent = persisted
-    ? `‘${plan.title}’ 메모를 저장했습니다.`
-    : '메모가 현재 화면에만 저장되었습니다. 브라우저 저장 공간 오류로 새로고침하면 사라질 수 있습니다.';
-  document.querySelector('#complete-message').textContent = `‘${plan.title}’ 메모를 내 메모 목록에서 확인할 수 있습니다.`;
-  showStep(4);
+  setSubmitState('loading', '메모를 저장하고 있습니다.');
+  requestAnimationFrame(() => {
+    const plan = {
+      id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+      ...getFormValues(),
+      canceled: false
+    };
+    plans.unshift(plan);
+    const persisted = savePlans();
+    if (!persisted) {
+      plans.shift();
+      setSubmitState('error', '메모를 저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.');
+      return;
+    }
+    setSubmitState('success', '메모 저장이 완료되었습니다.');
+    renderPlans();
+    archiveStatus.textContent = `‘${plan.title}’ 메모를 저장했습니다.`;
+    document.querySelector('#complete-message').textContent = `‘${plan.title}’ 메모를 내 메모 목록에서 확인할 수 있습니다.`;
+    showStep(4);
+  });
 });
 
 document.querySelector('#restart-button').addEventListener('click', () => {
   form.reset();
-  priorityOptions.hidden = true;
+  syncPriorityOptions();
   durationOutput.value = '10일';
   titleError.textContent = '';
   titleCount.textContent = '0 / 60자';
   titleInput.removeAttribute('aria-invalid');
+  setSubmitState('idle', '');
   showStep(1);
   titleInput.focus();
 });
-
-// 3. 수업의 createText / renderPlans 흐름 + MindStore 수정/삭제 기능
 function createText(tag, className, content) {
   const element = document.createElement(tag);
   element.className = className;
@@ -193,6 +221,9 @@ function updateCurrentNav () {
       link.removeAttribute('aria-current');
     }
   });
+  const currentLink = document.querySelector('.main-nav a[aria-current="page"]');
+  const pageName = currentLink ? currentLink.textContent.trim() : '홈';
+  document.title = `${pageName} | MindStore`;
 }
 
 window.addEventListener('hashchange', updateCurrentNav);
@@ -204,11 +235,23 @@ menuToggle.addEventListener('click',() => {
   menuToggle.setAttribute('aria-expanded', String(isOpen));
 });
 
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || !mainNav.classList.contains('is-open')) return;
+  mainNav.classList.remove('is-open');
+  menuToggle.textContent = '메뉴 열기';
+  menuToggle.setAttribute('aria-expanded', 'false');
+  menuToggle.focus();
+});
+
 navLinks.forEach((link) => {
   link.addEventListener('click', () => {
     mainNav.classList.remove('is-open');
-    menuToggle.textContent = "메뉴 열기";
+    menuToggle.textContent = '메뉴 열기';
     menuToggle.setAttribute('aria-expanded', 'false');
+    const destination = document.getElementById(link.hash.slice(1));
+    if (destination && !destination.hidden) {
+      requestAnimationFrame(() => destination.scrollIntoView({ block: 'start' }));
+    }
   });
 });
 
@@ -231,7 +274,7 @@ function renderPlans() {
   const emptyDescription = emptyState.querySelector('p');
   const emptyAction = emptyState.querySelector('a');
 
-  if(visiblePlans.length === 0){
+  if (visiblePlans.length === 0) {
     const filtered = currentFilter !== 'all';
     emptyTitle.textContent = filtered 
     ? "선택한 상태에 메모가 없습니다." 
@@ -241,7 +284,9 @@ function renderPlans() {
     ? "다른 상태를 선택해 주십시오."
     : "첫 메모를 작성하면 이곳에서 볼 수 있습니다.";
 
-    emptyAction.hidden = filtered;
+    emptyAction.hidden = false;
+    emptyAction.textContent = filtered ? '전체 보기' : '메모 만들러 가기';
+    emptyAction.href = filtered ? '#archive' : '#event-practice';
   }
 
   planCount.textContent = String(visiblePlans.length);
@@ -254,11 +299,14 @@ function renderPlans() {
   ['메모 제목', '기한', '중요도', '관리'].forEach(label => {
     header.append(createText('span', '', label));
   });
+  if (visiblePlans.length === 0) return;
   planList.append(header);
 
   visiblePlans.forEach(plan => {
-    const row = createText('div', 'memo-card', '');
-    row.append(createText('div', 'memo-title', plan.title));
+    const row = createText('div', `memo-card${plan.canceled ? ' is-canceled' : ''}`, '');
+    const title = createText('div', 'memo-title', plan.title);
+    title.append(createText('span', 'memo-state', plan.canceled ? ' · 취소됨' : ' · 저장됨'));
+    row.append(title);
     row.append(createText('div', 'memo-duration', `${plan.duration}일`));
     row.append(createText('div', 'memo-priority', priorityText(plan)));
     const actions = createText('div', 'memo-actions', '');
@@ -266,11 +314,16 @@ function renderPlans() {
     editButton.type = 'button';
     editButton.dataset.action = 'edit';
     editButton.dataset.id = plan.id;
+    const toggleButton = createText('button', 'button button-text', plan.canceled ? '취소 되돌리기' : '메모 취소');
+    toggleButton.type = 'button';
+    toggleButton.dataset.action = 'toggle';
+    toggleButton.dataset.id = plan.id;
+    toggleButton.setAttribute('aria-label', `${plan.title} ${plan.canceled ? '취소 되돌리기' : '메모 취소'}`);
     const deleteButton = createText('button', 'button delete-button', '삭제');
     deleteButton.type = 'button';
     deleteButton.dataset.action = 'delete';
     deleteButton.dataset.id = plan.id;
-    actions.append(editButton, deleteButton);
+    actions.append(editButton, toggleButton, deleteButton);
     row.append(actions);
     planList.append(row);
   });
@@ -287,7 +340,20 @@ filterButtons.forEach((button) => {
     });
 
     renderPlans();
+    const count = getVisiblePlans().length;
+    const filterName = button.textContent.trim();
+    archiveStatus.textContent = count > 0
+      ? `${filterName} 메모 ${count}개가 표시됩니다.`
+      : `${filterName} 메모가 없습니다. 다른 조건을 선택해 보세요.`;
   });
+});
+
+emptyState.querySelector('a').addEventListener('click', (event) => {
+  if (currentFilter === 'all') return;
+  event.preventDefault();
+  const allButton = document.querySelector('[data-filter="all"]');
+  allButton.click();
+  allButton.focus();
 });
 
 const memoEditDialog = document.querySelector('#memo-edit-dialog');
@@ -309,7 +375,21 @@ planList.addEventListener('click', event => {
     editMemoDuration.value = plan.duration;
     editMemoPriority.value = plan.priority ? plan.priorityValue : 'none';
     editMemoError.textContent = '';
+    editMemoTitle.removeAttribute('aria-invalid');
     memoEditDialog.showModal();
+    return;
+  }
+
+  if (button.dataset.action === 'toggle') {
+    plan.canceled = !plan.canceled;
+    const persisted = savePlans();
+    renderPlans();
+    archiveStatus.textContent = persisted
+      ? `‘${plan.title}’ 메모를 ${plan.canceled ? '취소했습니다' : '복구했습니다'}.`
+      : '상태를 변경했지만 브라우저에 저장하지 못했습니다.';
+    const nextButton = [...planList.querySelectorAll('button[data-action="toggle"]')].find(item => item.dataset.id === plan.id);
+    const selectedFilter = document.querySelector('.filter-button[aria-pressed="true"]');
+    (nextButton || selectedFilter)?.focus();
     return;
   }
 
@@ -319,6 +399,8 @@ planList.addEventListener('click', event => {
     const persisted = savePlans();
     renderPlans();
     archiveStatus.textContent = persisted ? '메모가 삭제되었습니다.' : '화면에서 삭제했지만 저장 공간 오류로 새로고침하면 복구될 수 있습니다.';
+    const selectedFilter = document.querySelector('.filter-button[aria-pressed="true"]');
+    selectedFilter?.focus();
   }
 });
 
@@ -327,6 +409,7 @@ memoEditForm.addEventListener('submit', event => {
   const title = editMemoTitle.value.trim();
   if (title.length < 2) {
     editMemoError.textContent = '메모 제목은 2자 이상 입력해 주세요.';
+    editMemoTitle.setAttribute('aria-invalid', 'true');
     editMemoTitle.focus();
     return;
   }
@@ -335,6 +418,7 @@ memoEditForm.addEventListener('submit', event => {
     editMemoError.textContent = '수정할 메모를 찾을 수 없습니다.';
     return;
   }
+  editMemoTitle.removeAttribute('aria-invalid');
   plan.title = title;
   plan.duration = editMemoDuration.value;
   plan.priority = editMemoPriority.value !== 'none';
@@ -346,6 +430,7 @@ memoEditForm.addEventListener('submit', event => {
 });
 
 document.querySelector('#memo-edit-cancel').addEventListener('click', () => memoEditDialog.close());
+document.querySelector('#memo-edit-close').addEventListener('click', () => memoEditDialog.close());
 memoEditDialog.addEventListener('close', () => { editingMemoId = null; });
 
 const tabs = [...document.querySelectorAll('.tab')];
