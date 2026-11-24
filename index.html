@@ -17,6 +17,10 @@
     <div class="container header-inner">
       <a class="brand" href="#top" aria-label="MindStore 맨 위로">MindStore</a>
 
+      <a class="sidebar-cta" href="#event-practice">
+        <span aria-hidden="true">+</span> 새 메모 만들기
+      </a>
+
       <button id="menu-toggle" class="menu-toggle" type="button"
       aria-controls="main-nav" aria-expanded="false">
         메뉴열기
@@ -205,7 +209,7 @@
 
       <p id="archive-status" class="archive-status" role="status" aria-live="polite"></p>
       <div id="empty-state" class="empty-state"><span class="empty-icon" aria-hidden="true">✎</span><h3>아직 작성한 메모가 없습니다.</h3><p>첫 번째 메모를 만들어 보세요.</p><a class="button button-secondary" href="#event-practice">메모 만들러 가기</a></div>
-      <div id="plan-list" class="memo-list" aria-label="저장한 메모 목록" hidden></div>
+      <ul id="plan-list" class="plan-list" aria-label="저장한 메모 목록" hidden></ul>
     </section>
 
     <section id="writing" class="section container" aria-labelledby="writing-title">
@@ -224,6 +228,16 @@
     <h2 id="recording-title">프로토타입 이용 안내</h2>
     <p id="recording-description">실제 녹음이나 서버 전송은 하지 않습니다. 메모 제목, 기한, 중요도는 이 브라우저에 저장됩니다.</p>
     <div class="dialog-actions"><button id="recording-close" class="button button-secondary" type="button">돌아가기</button><button id="recording-confirm" class="button button-primary" type="button">확인하고 시작</button></div>
+  </dialog>
+
+  <dialog id="plan-dialog" class="app-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-heading"><h2 id="dialog-title"></h2><button id="dialog-close" class="icon-button" type="button" aria-label="메모 상세 창 닫기">×</button></div>
+    <p id="dialog-status" class="dialog-status"></p>
+    <dl class="summary-list">
+      <div><dt>메모 기한</dt><dd id="dialog-duration"></dd></div>
+      <div><dt>메모 중요도</dt><dd id="dialog-priority"></dd></div>
+    </dl>
+    <div class="dialog-actions"><button id="dialog-done" class="button button-primary" type="button">확인</button></div>
   </dialog>
 
   <dialog id="memo-edit-dialog" class="app-dialog" aria-labelledby="memo-edit-heading">

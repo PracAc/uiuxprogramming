@@ -34,6 +34,7 @@ function readPlans() {
         duration: durationValues.includes(String(plan.duration)) ? String(plan.duration) : '10',
         priority: plan.priority === true,
         priorityValue: Object.prototype.hasOwnProperty.call(priorityNames, plan.priorityValue) ? plan.priorityValue : 'medium',
+        createdAt: typeof plan.createdAt === 'string' ? plan.createdAt : '',
         canceled: plan.canceled === true || plan.cancelled === true
       }));
   } catch {
@@ -170,7 +171,8 @@ saveButton.addEventListener('click', () => {
       id: typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
         ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       ...getFormValues(),
-      canceled: false
+      canceled: false,
+      createdAt: new Date().toISOString()
     };
     plans.unshift(plan);
     const persisted = savePlans();
@@ -263,9 +265,57 @@ function getVisiblePlans() {
   });
 }
 
+function createPlanCard(plan) {
+  const card = document.createElement('li');
+  card.className = `plan-card${plan.canceled ? ' is-canceled' : ''}`;
+
+  const top = document.createElement('div');
+  top.className = 'plan-card-top';
+  top.append(createText('span', 'plan-state', plan.canceled ? '취소됨' : '저장됨'));
+
+  if (plan.createdAt) {
+    const date = new Date(plan.createdAt);
+    if (!Number.isNaN(date.getTime())) {
+      const dateText = new Intl.DateTimeFormat('ko-KR', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      }).format(date);
+      const dateElement = createText('time', 'plan-date', dateText);
+      dateElement.dateTime = plan.createdAt;
+      top.append(dateElement);
+    }
+  }
+
+  card.append(top);
+  card.append(createText('span', 'plan-card-icon', '↗'));
+  card.lastElementChild.setAttribute('aria-hidden', 'true');
+  card.append(createText('h3', 'plan-title', plan.title));
+  card.append(createText('p', 'plan-meta', `${plan.duration}일 · 중요도 ${priorityText(plan)}`));
+
+  const actions = document.createElement('div');
+  actions.className = 'plan-actions';
+
+  const options = [
+    { action: 'open', text: '내용 보기', style: 'button button-secondary' },
+    { action: 'edit', text: '수정', style: 'button button-secondary' },
+    { action: 'toggle', text: plan.canceled ? '취소 되돌리기' : '메모 취소', style: 'button button-text' },
+    { action: 'delete', text: '삭제', style: 'button delete-button' }
+  ];
+
+  options.forEach(option => {
+    const button = createText('button', option.style, option.text);
+    button.type = 'button';
+    button.dataset.action = option.action;
+    button.dataset.id = plan.id;
+    button.setAttribute('aria-label', `${plan.title} ${option.text}`);
+    actions.append(button);
+  });
+
+  card.append(actions);
+  return card;
+}
+
 function renderPlans() {
   const visiblePlans = getVisiblePlans();
-
   planList.replaceChildren();
   emptyState.hidden = visiblePlans.length !== 0;
   planList.hidden = visiblePlans.length === 0;
@@ -276,57 +326,16 @@ function renderPlans() {
 
   if (visiblePlans.length === 0) {
     const filtered = currentFilter !== 'all';
-    emptyTitle.textContent = filtered 
-    ? "선택한 상태에 메모가 없습니다." 
-    : "아직 저장한 메모가 없습니다.";
-
-    emptyDescription.textContent = filtered
-    ? "다른 상태를 선택해 주십시오."
-    : "첫 메모를 작성하면 이곳에서 볼 수 있습니다.";
-
+    emptyTitle.textContent = filtered ? '선택한 상태에 메모가 없습니다.' : '아직 저장한 메모가 없습니다.';
+    emptyDescription.textContent = filtered ? '다른 상태를 선택해 주세요.' : '첫 메모를 작성하면 이곳에서 볼 수 있습니다.';
     emptyAction.hidden = false;
     emptyAction.textContent = filtered ? '전체 보기' : '메모 만들러 가기';
     emptyAction.href = filtered ? '#archive' : '#event-practice';
   }
 
   planCount.textContent = String(visiblePlans.length);
-  planCount.setAttribute(
-    'aria-label',
-    `저장한 메모 ${plans.length}개`
-  )
-
-  const header = createText('div', 'memo-table-header', '');
-  ['메모 제목', '기한', '중요도', '관리'].forEach(label => {
-    header.append(createText('span', '', label));
-  });
-  if (visiblePlans.length === 0) return;
-  planList.append(header);
-
-  visiblePlans.forEach(plan => {
-    const row = createText('div', `memo-card${plan.canceled ? ' is-canceled' : ''}`, '');
-    const title = createText('div', 'memo-title', plan.title);
-    title.append(createText('span', 'memo-state', plan.canceled ? ' · 취소됨' : ' · 저장됨'));
-    row.append(title);
-    row.append(createText('div', 'memo-duration', `${plan.duration}일`));
-    row.append(createText('div', 'memo-priority', priorityText(plan)));
-    const actions = createText('div', 'memo-actions', '');
-    const editButton = createText('button', 'button button-secondary', '수정');
-    editButton.type = 'button';
-    editButton.dataset.action = 'edit';
-    editButton.dataset.id = plan.id;
-    const toggleButton = createText('button', 'button button-text', plan.canceled ? '취소 되돌리기' : '메모 취소');
-    toggleButton.type = 'button';
-    toggleButton.dataset.action = 'toggle';
-    toggleButton.dataset.id = plan.id;
-    toggleButton.setAttribute('aria-label', `${plan.title} ${plan.canceled ? '취소 되돌리기' : '메모 취소'}`);
-    const deleteButton = createText('button', 'button delete-button', '삭제');
-    deleteButton.type = 'button';
-    deleteButton.dataset.action = 'delete';
-    deleteButton.dataset.id = plan.id;
-    actions.append(editButton, toggleButton, deleteButton);
-    row.append(actions);
-    planList.append(row);
-  });
+  planCount.setAttribute('aria-label', `현재 조건에 표시된 메모 ${visiblePlans.length}개`);
+  visiblePlans.forEach(plan => planList.append(createPlanCard(plan)));
 }
 
 filterButtons.forEach((button) => {
@@ -356,6 +365,10 @@ emptyState.querySelector('a').addEventListener('click', (event) => {
   allButton.focus();
 });
 
+const planDialog = document.querySelector('#plan-dialog');
+document.querySelector('#dialog-close').addEventListener('click', () => planDialog.close());
+document.querySelector('#dialog-done').addEventListener('click', () => planDialog.close());
+
 const memoEditDialog = document.querySelector('#memo-edit-dialog');
 const memoEditForm = document.querySelector('#memo-edit-form');
 const editMemoTitle = document.querySelector('#edit-memo-title');
@@ -368,6 +381,15 @@ planList.addEventListener('click', event => {
   if (!button || !planList.contains(button)) return;
   const plan = plans.find(item => item.id === button.dataset.id);
   if (!plan) return;
+
+  if (button.dataset.action === 'open') {
+    document.querySelector('#dialog-title').textContent = plan.title;
+    document.querySelector('#dialog-status').textContent = plan.canceled ? '취소된 메모입니다.' : '저장된 메모입니다.';
+    document.querySelector('#dialog-duration').textContent = `${plan.duration}일`;
+    document.querySelector('#dialog-priority').textContent = priorityText(plan);
+    planDialog.showModal();
+    return;
+  }
 
   if (button.dataset.action === 'edit') {
     editingMemoId = plan.id;
